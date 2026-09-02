@@ -72,7 +72,7 @@ function collectWords(events: EventItem[], metas: Record<string, EventMeta>): { 
   }
   for (const e of events) add(e.title)
   for (const m of Object.values(metas)) if (m.reflection) add(m.reflection)
-  return [...freq.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([name, value]) => ({ name, value }))
+  return [...freq.entries()].sort((a, b) => b[1] - a[1]).slice(0, 9).map(([name, value]) => ({ name, value }))
 }
 
 /** 计算附加统计（图表数据） */

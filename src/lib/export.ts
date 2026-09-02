@@ -6,7 +6,7 @@ import { effectiveCategory } from './boardStats'
 /** 导出看板归类结果 + 打分反思 为 Markdown（用于转正汇报/年终总结） */
 export function exportBoardMarkdown(events: EventItem[], metas: Record<string, EventMeta>): string {
   const lines: string[] = []
-  lines.push('# 个人产出看板')
+  lines.push('# 度厂观测站')
   lines.push('')
   lines.push(`> 导出时间：${new Date().toISOString().slice(0, 10)}`)
   lines.push(`> 共 ${events.length} 件事 · 已归类 ${events.filter((e) => effectiveCategory(e, metas) !== 'unassigned').length} 件`)

@@ -116,7 +116,7 @@ function AppContent() {
   const handleExport = () => {
     const md = exportBoardMarkdown(filteredEvents, board.metas)
     const suffix = quarter === 'all' ? '全部' : quarter
-    downloadText(`个人产出看板-${suffix}-${new Date().toISOString().slice(0, 10)}.md`, md)
+    downloadText(`度厂观测站-${suffix}-${new Date().toISOString().slice(0, 10)}.md`, md)
   }
 
   return (
@@ -140,7 +140,7 @@ function AppContent() {
                   fill="#f16553"
                 />
               </svg>
-              <span>个人工作看板</span>
+              <span>度厂观测站</span>
             </div>
             <div className="app-header-right">
               <Select

@@ -1,5 +1,5 @@
 -- ============================================================
--- 个人产出看板 · Supabase 建表脚本
+-- 度厂观测站 · Supabase 建表脚本
 -- 使用方法：登录 https://supabase.com/dashboard/project/vtslbeziohxlvmibthfp
 --   左侧 SQL Editor → New query → 粘贴全部内容 → Run
 -- ============================================================

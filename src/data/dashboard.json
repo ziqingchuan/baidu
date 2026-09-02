@@ -1,6 +1,17 @@
 {
-  "fetchedAt": "2026-09-02T05:46:29.475Z",
+  "fetchedAt": "2026-09-02T06:54:24.574Z",
   "reviews": [
+    {
+      "number": 122357614,
+      "project": "baidu/personal-code/self-kanban",
+      "branch": "master",
+      "subject": "feat: 看板图表页优化——新增趣味图并调整布局",
+      "status": "MERGED",
+      "insertions": 0,
+      "deletions": 0,
+      "updated": "2026-09-02 13:50:05",
+      "revision": "1d0ad5ee1772095cbadd1ecfbf983b48bfea9a51"
+    },
     {
       "number": 122349386,
       "project": "baidu/personal-code/dodo-query-viewer",

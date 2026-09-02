@@ -341,13 +341,13 @@ function WeekdayRadar({ extra }: { extra: ExtraStats }) {
 /** 年度关键词气泡：频率决定气泡大小；显式防重叠（碰撞外扩）+ 字号随词长自适应 */
 const BUBBLE_COLORS = ['#7aa7f0', '#a78bfa', '#6ccfcf', '#f2a08d', '#8bcfa6', '#f0b47e', '#e8849a', '#8a93a5']
 function KeywordBubble({ extra }: { extra: ExtraStats }) {
-  const kws = extra.keywords.slice(0, 8)
+  const kws = extra.keywords.slice(0, 10)
   const maxV = Math.max(1, ...kws.map((k) => k.value))
 
   // 按频率降序放置（大的在里圈），碰撞则向外扩张找角度，保证互不重叠
   const placed: { x: number; y: number; r: number }[] = []
   const data = kws.map((k, i) => {
-    const r = 20 + (k.value / maxV) * 26
+    const r = 20 + (k.value / maxV) * 23
     let best = { x: 0, y: 0 }
     // 从内圈开始逐圈尝试，直到找到不与任何已放气泡相交的位置
     outer: for (let ring = 1; ring <= 24; ring++) {
@@ -378,8 +378,8 @@ function KeywordBubble({ extra }: { extra: ExtraStats }) {
   const option = {
     ...chartBase,
     tooltip: { ...chartBase.tooltip, trigger: 'item', formatter: (p: any) => `${p.name}<br/>出现 ${p.value[2]} 次` },
-    xAxis: { type: 'value', min: -100, max: 100, show: false },
-    yAxis: { type: 'value', min: -100, max: 100, show: false },
+    xAxis: { type: 'value', min: -112, max: 112, show: false },
+    yAxis: { type: 'value', min: -112, max: 112, show: false },
     series: [{ type: 'scatter', data }],
   }
   return (
@@ -449,7 +449,9 @@ function BizRepoTreemap({ extra }: { extra: ExtraStats }) {
   }
   const data = extra.repoCount.map((r) => ({
     name: r.repo,
-    value: r.count,
+    // 面积用 log1p 压缩（避免任务量悬殊导致小库矩形过小），大小关系仍保留
+    value: Math.log1p(r.count),
+    count: r.count,
     itemStyle: {
       color: alpha(bizColor.get(repoBiz.get(r.repo) ?? '') ?? '#8a93a5', 0.75),
       borderRadius: 10,
@@ -459,7 +461,7 @@ function BizRepoTreemap({ extra }: { extra: ExtraStats }) {
   }))
   const option = {
     ...chartBase,
-    tooltip: { ...chartBase.tooltip, trigger: 'item', formatter: (p: any) => `${p.name}<br/>${p.value ?? ''} 个任务` },
+    tooltip: { ...chartBase.tooltip, trigger: 'item', formatter: (p: any) => `${p.name}<br/>${p.data?.count ?? ''} 个任务` },
     series: [
       {
         type: 'treemap',
@@ -467,7 +469,7 @@ function BizRepoTreemap({ extra }: { extra: ExtraStats }) {
         roam: false,
         nodeClick: false,
         breadcrumb: { show: false },
-        label: { color: '#fff', fontWeight: 600, fontSize: 12 },
+        label: { color: '#fff', fontWeight: 600, fontSize: 12, formatter: '{b}' },
         upperLabel: { show: false },
         // 矩形之间的留白，让圆角与半透明效果可见
         gapWidth: 4,

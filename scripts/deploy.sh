@@ -2,13 +2,13 @@
 # 构建并部署到 popo。用法：
 #   pnpm deploy                    # 用默认 slug/title
 #   pnpm deploy [slug] [title]     # 自定义
-# 默认 slug=qingchuan-dashboard，title=个人工作看板
+# 默认 slug=qingchuan-dashboard，title=度厂观测站
 # 流程：先拉取最新数据（export-data），再构建，再部署（带动态数据 Schema），再规划 member 角色权限。
 # 注意：不传 --visibility，保留 popo 上已设置的权限（可见范围）
 set -euo pipefail
 
 SLUG="${1:-qingchuan-dashboard}"
-TITLE="${2:-个人工作看板}"
+TITLE="${2:-度厂观测站}"
 UPLOAD_SCRIPT="${POPO_UPLOAD_SCRIPT:-$HOME/.comate/skills/.system/popo/scripts/upload.py}"
 PERM_SCRIPT="${POPO_PERM_SCRIPT:-$HOME/.comate/skills/.system/popo/scripts/permissions.py}"
 
