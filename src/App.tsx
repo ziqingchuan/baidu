@@ -5,6 +5,7 @@ import zhCN from 'antd/locale/zh_CN'
 import { useDashboardData } from './lib/useDashboardData'
 import { useBoardState } from './hooks/useBoardState'
 import { buildBoardStats } from './lib/boardStats'
+import { buildExtraStats } from './lib/extraStats'
 import { exportBoardMarkdown, downloadText } from './lib/export'
 import { isAuthed, setAuthed, checkPassword } from './lib/mockAuth'
 import KanbanBoard from './components/KanbanBoard'
@@ -51,7 +52,7 @@ function AppContent() {
   }, [dash.events])
   const board = useBoardState(businessDefaults)
   const { message } = AntApp.useApp()
-  const [view, setView] = useState<View>('board')
+  const [view, setView] = useState<View>('charts')
   const [quarter, setQuarter] = useState<string>('all')
   const [syncing, setSyncing] = useState(false)
   // 同步到云端的逻辑保留，按钮暂不显示（置为 true 即恢复显示）
@@ -106,6 +107,12 @@ function AppContent() {
     [filteredEvents, board.metas],
   )
 
+  // 附加统计：基于全部任务（不随季度过滤），供图表页展示
+  const extra = useMemo(
+    () => buildExtraStats(dash.events, board.metas),
+    [dash.events, board.metas],
+  )
+
   const handleExport = () => {
     const md = exportBoardMarkdown(filteredEvents, board.metas)
     const suffix = quarter === 'all' ? '全部' : quarter
@@ -149,8 +156,8 @@ function AppContent() {
                 value={view}
                 onChange={(v) => setView(v as View)}
                 options={[
-                  { value: 'board', label: '任务看板' },
                   { value: 'charts', label: '数据图表' },
+                  { value: 'board', label: '任务看板' },
                 ]}
               />
               {showSyncButton && (
@@ -193,7 +200,7 @@ function AppContent() {
                 editable={authed}
               />
             ) : (
-              <ChartsSection stats={stats} />
+              <ChartsSection stats={stats} extra={extra} />
             )}
           </main>
 
@@ -209,7 +216,7 @@ function AppContent() {
         cancelText="取消"
         onOk={handleLogin}
         onCancel={() => setLoginOpen(false)}
-        destroyOnClose
+          destroyOnHidden
       >
         <Input.Password
           placeholder="请输入密码"
