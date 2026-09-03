@@ -226,9 +226,20 @@ function CodeVolume({ stats }: { stats: BoardStats }) {
   )
 }
 
-/** 全年产出日历热力图：每天一格，颜色深浅=任务数（Streak 一眼可见） */
+/** 产出日历热力图：每天一格，颜色深浅=任务数（Streak 一眼可见），范围跟随筛选 */
 function YearCalendar({ extra }: { extra: ExtraStats }) {
   const max = Math.max(1, ...extra.daily.map((d) => d.count))
+  // 范围：筛选到季度时只显示该季度月份；全部时显示全年
+  const dates = extra.daily.map((d) => d.date).sort()
+  const range = dates.length
+    ? (() => {
+        const min = dates[0]
+        const max = dates[dates.length - 1]
+        // 跨度超过 120 天视为全年视图，否则按实际起止月显示
+        const span = (new Date(max).getTime() - new Date(min).getTime()) / 86400000
+        return span > 120 ? extra.year : [min.slice(0, 7) + '-01', max]
+      })()
+    : extra.year
   const option = {
     ...chartBase,
     tooltip: {
@@ -250,7 +261,7 @@ function YearCalendar({ extra }: { extra: ExtraStats }) {
       left: 30,
       right: 20,
       cellSize: ['auto', 16],
-      range: extra.year,
+      range,
       splitLine: { show: false },
       itemStyle: { color: '#f2f4f8', borderColor: '#fff', borderWidth: 2 },
       dayLabel: { color: '#a9b0bf', fontSize: 10 },
@@ -265,8 +276,11 @@ function YearCalendar({ extra }: { extra: ExtraStats }) {
     ],
   }
   return (
-    <Card size="small" title="全年产出日历" className="charts-card">
-      <ReactECharts option={option} style={{ height: 220 }} notMerge />
+    <Card size="small" title="产出日历" className="charts-card">
+      {/* key 随筛选范围变化 → 切换季度时重挂载 + CSS 淡入（ECharts 日历热力图原生更新动画不可靠） */}
+      <div key={JSON.stringify(range)} className="calendar-fade">
+        <ReactECharts option={option} style={{ height: 220 }} />
+      </div>
     </Card>
   )
 }
@@ -365,8 +379,10 @@ function KeywordBubble({ extra }: { extra: ExtraStats }) {
       }
     }
     placed.push({ x: best.x, y: best.y, r })
-    // 字号随词长自适应：词越长字号越小，保证不溢出气泡
-    const fontSize = k.name.length > 6 ? 10 : k.name.length > 4 ? 12 : 14
+    // 字号按气泡半径自适应：r 越小字越小，且整体偏小，保证长词不溢出
+    // 中文约 1em 宽，半径需容纳 词长×字号/2，留 20% 余量
+    const maxFont = (r * 1.6) / Math.max(k.name.length, 1)
+    const fontSize = Math.max(8, Math.min(11, maxFont))
     return {
       name: k.name,
       value: [best.x, best.y, k.value],
@@ -383,7 +399,7 @@ function KeywordBubble({ extra }: { extra: ExtraStats }) {
     series: [{ type: 'scatter', data }],
   }
   return (
-    <Card size="small" title="年度关键词" className="charts-card">
+    <Card size="small" title="我的关键词" className="charts-card">
       <ReactECharts option={option} style={{ height: 240 }} notMerge />
     </Card>
   )
@@ -438,22 +454,25 @@ function BizCategoryHeatmap({ extra }: { extra: ExtraStats }) {
   )
 }
 
-/** 产出集中在哪些代码库（矩形树图：每个代码库一个矩形，大小 = 任务数，颜色 = 所属业务） */
+/** 产出集中在哪些代码库（矩形树图：每个代码库一个矩形，大小 = 任务数，每个库独立配色） */
 function BizRepoTreemap({ extra }: { extra: ExtraStats }) {
-  const bizColor = new Map(BUSINESSES.map((b) => [b.name, b.color]))
-  const repoBiz = new Map(extra.bizRepo.map((x) => [x.repo, x.biz]))
-  // hex → rgba（半透明，透明度 ~0.55）
+  // 每个代码库独立颜色（足够多的柔和色，按索引轮换，避免同业务撞色）
+  const REPO_COLORS = [
+    '#7aa7f0', '#a78bfa', '#6ccfcf', '#f2a08d', '#8bcfa6', '#f0b47e',
+    '#e8849a', '#8a93a5', '#7fd0a8', '#b48ae8', '#e8b06e', '#6ab7e8',
+  ]
+  // hex → rgba（半透明，透明度 ~0.75）
   const alpha = (hex: string, a: number) => {
     const n = parseInt(hex.slice(1), 16)
     return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`
   }
-  const data = extra.repoCount.map((r) => ({
+  const data = extra.repoCount.map((r, i) => ({
     name: r.repo,
     // 面积用 log1p 压缩（避免任务量悬殊导致小库矩形过小），大小关系仍保留
     value: Math.log1p(r.count),
     count: r.count,
     itemStyle: {
-      color: alpha(bizColor.get(repoBiz.get(r.repo) ?? '') ?? '#8a93a5', 0.75),
+      color: alpha(REPO_COLORS[i % REPO_COLORS.length], 0.75),
       borderRadius: 10,
       borderColor: 'rgba(255,255,255,0.7)',
       borderWidth: 2,
@@ -469,11 +488,27 @@ function BizRepoTreemap({ extra }: { extra: ExtraStats }) {
         roam: false,
         nodeClick: false,
         breadcrumb: { show: false },
-        label: { color: '#fff', fontWeight: 600, fontSize: 12, formatter: '{b}' },
+        label: {
+          color: '#fff',
+          fontWeight: 600,
+          fontSize: 12,
+          formatter: '{b}',
+          // treemap 默认 truncate 会截断成 personal-...；关闭截断，完整显示库名
+          overflow: 'none',
+        },
         upperLabel: { show: false },
         // 矩形之间的留白，让圆角与半透明效果可见
         gapWidth: 4,
         itemStyle: { borderColor: 'rgba(255,255,255,0.7)', borderWidth: 2, borderRadius: 10 },
+        // 细长矩形：文本旋转 90° 竖排；正常矩形横向（必须显式 rotate:0，否则上次的 90° 残留不会转回来）
+        labelLayout: (params: any) => {
+          const w = params.rect?.width ?? params.width ?? 100
+          const h = params.rect?.height ?? params.height ?? 30
+          if (w < h * 0.7) {
+            return { rotate: 90, fontSize: 10, align: 'center', verticalAlign: 'middle', overflow: 'none' }
+          }
+          return { rotate: 0, fontSize: 12, overflow: 'none' }
+        },
       },
     ],
   }
@@ -484,11 +519,12 @@ function BizRepoTreemap({ extra }: { extra: ExtraStats }) {
   )
 }
 
-/** 图表区：自上而下 = 整体规模 → 业务分布 → 工作节奏 → 分类趋势 → 代码质量 */
+/** 图表区：自上而下 = 整体规模 → 业务分布 → 工作节奏 → 分类趋势 → 代码质量
+ *  extra = 随季度筛选的数据（所有图都跟随筛选） */
 export default function ChartsSection({ stats, extra }: { stats: BoardStats; extra: ExtraStats }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* 整体规模：全年产出日历 + 年度关键词 */}
+      {/* 整体规模：产出日历 + 关键词（跟随筛选） */}
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={16}>
           <YearCalendar extra={extra} />
@@ -497,7 +533,7 @@ export default function ChartsSection({ stats, extra }: { stats: BoardStats; ext
           <KeywordBubble extra={extra} />
         </Col>
       </Row>
-      {/* 业务分布：产出代码库 + 各业务工作类型 */}
+      {/* 业务分布：产出代码库 + 各业务工作类型（随季度变） */}
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={12}>
           <BizRepoTreemap extra={extra} />
@@ -506,7 +542,7 @@ export default function ChartsSection({ stats, extra }: { stats: BoardStats; ext
           <BizCategoryHeatmap extra={extra} />
         </Col>
       </Row>
-      {/* 工作节奏：周节奏 + 24h 节律 */}
+      {/* 工作节奏：周节奏 + 24h 节律（随季度变） */}
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={8}>
           <WeekdayRadar extra={extra} />

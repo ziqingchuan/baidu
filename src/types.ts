@@ -78,16 +78,18 @@ export interface EventItem {
   raw: Card | Review | Commit
 }
 
-/** 看板任务元数据：分类 + 难度 + 反思 + 所属业务（localStorage 持久化） */
+/** 看板任务元数据：分类 + 难度 + 反思 + 所属业务 + 关键成果（localStorage 持久化） */
 export interface EventMeta {
   /** 所属分类 id */
   category: CategoryId
-  /** 任务难度 1-5，0 表示未打分 */
+  /** 任务难度 1-5，0 未打分 */
   difficulty: number
   /** 总结反思正文 */
   reflection: string
   /** 所属业务（用户手动覆盖值；为空则用任务的自动推断值） */
   business?: BusinessId
+  /** 关键成果奖牌：gold/silver/copper，无则不标记 */
+  award?: 'gold' | 'silver' | 'copper'
   /** 更新时间 */
   updatedAt: string
 }

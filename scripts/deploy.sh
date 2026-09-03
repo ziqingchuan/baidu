@@ -38,6 +38,7 @@ UPLOAD_OUT="$(
         "difficulty": { "type": "integer", "description": "难度 1-5", "minimum": 0, "maximum": 5 },
         "reflection": { "type": "string", "description": "总结反思" },
         "business": { "type": "string", "description": "所属业务" },
+        "award": { "type": "string", "description": "关键成果奖牌（空串=无）", "enum": ["", "gold", "silver", "copper"] },
         "updated_at": { "type": "string", "description": "更新时间 ISO" },
         "state": { "type": "string", "description": "记录状态", "enum": ["active", "removed"] }
       },

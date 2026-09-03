@@ -1,6 +1,28 @@
 {
-  "fetchedAt": "2026-09-02T06:54:24.574Z",
+  "fetchedAt": "2026-09-03T03:53:38.760Z",
   "reviews": [
+    {
+      "number": 122372320,
+      "project": "baidu/BunnyDo/bunnydo-frontend",
+      "branch": "master",
+      "subject": "bunnydo-44 [Story] 【前端】tailwindcss v4降级为v3",
+      "status": "MERGED",
+      "insertions": 537,
+      "deletions": 482,
+      "updated": "2026-09-02 20:49:51",
+      "revision": "4d94e9f4c79171f48cb180dc9919b13899e49e58"
+    },
+    {
+      "number": 122362147,
+      "project": "baidu/personal-code/self-kanban",
+      "branch": "master",
+      "subject": "feat: 项目标题改为「度厂观测站」并微调图表",
+      "status": "OPEN",
+      "insertions": 0,
+      "deletions": 0,
+      "updated": "2026-09-02 15:26:50",
+      "revision": "47bcfc4b1a085155fa0d32f0f28a1500e97377ff"
+    },
     {
       "number": 122357614,
       "project": "baidu/personal-code/self-kanban",
@@ -961,6 +983,14 @@
   ],
   "commits": [
     {
+      "commitId": "4d94e9f4c79171f48cb180dc9919b13899e49e58",
+      "author": "ziqingchuan",
+      "commitTime": "2026-09-02 20:14:34",
+      "addLines": 480,
+      "deleteLines": 422,
+      "subject": "bunnydo-44 [Story] 【前端】tailwindcss v4降级为v3"
+    },
+    {
       "commitId": "5b2255ae8cdbfb87b7baa244144115dba383cfd1",
       "author": "ziqingchuan",
       "commitTime": "2026-09-01 20:13:44",
@@ -1850,6 +1880,17 @@
     }
   ],
   "cards": [
+    {
+      "space": "bunnydo",
+      "sequence": 44,
+      "title": "【前端】tailwindcss v4降级为v3",
+      "status": "新建",
+      "type": "Story",
+      "assignee": "ziqingchuan",
+      "isFinished": false,
+      "lastModified": "2026-09-02 20:08:55",
+      "parent": "再入江湖之 init"
+    },
     {
       "space": "bunnydo",
       "sequence": 41,

@@ -2,6 +2,9 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { EventItem, EventMeta } from '../types'
 import { businessById } from '../lib/business'
+import { awardById } from '../lib/awards'
+import AwardBadge from './AwardBadge'
+import starSvg from '../assets/star.svg'
 
 interface Props {
   event: EventItem
@@ -11,7 +14,7 @@ interface Props {
   disabled?: boolean
 }
 
-/** 看板卡片：名称(左上) + 所属业务(右上) + 代码变更数 + 日期 */
+/** 看板卡片：名称(左上) + 所属业务(右上) + 代码变更数 + 日期 + 关键成果奖牌(右上角) */
 export default function BoardCard({ event, meta, onClick, disabled = false }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: event.key,
@@ -25,6 +28,7 @@ export default function BoardCard({ event, meta, onClick, disabled = false }: Pr
   }
 
   const biz = businessById(meta?.business ?? event.business)
+  const award = awardById(meta?.award)
 
   return (
     <div
@@ -35,12 +39,20 @@ export default function BoardCard({ event, meta, onClick, disabled = false }: Pr
       onClick={onClick}
       className="board-card"
     >
+      {award && (
+        <span className="board-card-award">
+          <AwardBadge award={award.id} size={20} />
+        </span>
+      )}
       <div className="board-card-title" title={event.title}>
         {event.title}
       </div>
       <div className="board-card-meta">
         {meta?.difficulty ? (
-          <span className="board-card-score">⭐️{meta.difficulty}</span>
+          <span className="board-card-score">
+            <img className="diff-star" src={starSvg} alt="" />
+            {meta.difficulty}
+          </span>
         ) : null}
         {biz && (
           <span className="board-card-biz" style={{ color: biz.color, borderColor: biz.color }}>

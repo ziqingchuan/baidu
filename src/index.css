@@ -370,8 +370,7 @@ body {
 }
 
 .board-card:hover {
-  box-shadow: var(--shadow-hover);
-  border-color: rgba(107, 143, 232, 0.4);
+  border-color: rgba(107, 143, 232, 0.6);
 }
 
 .board-card:active {
@@ -390,7 +389,7 @@ body {
   margin-bottom: 6px;
 }
 
-/* 元信息行：难度打分(⭐️N)左对齐 + 所属业务标签右对齐 */
+/* 元信息行：难度打分(星级N)左对齐 + 所属业务标签右对齐 */
 .board-card-meta {
   display: flex;
   align-items: center;
@@ -399,7 +398,7 @@ body {
   min-height: 16px;
 }
 
-/* 难度打分：紧凑的 ⭐️N 形式（粉色） */
+/* 难度打分：紧凑的 星级N 形式（粉色） */
 .board-card-score {
   flex-shrink: 0;
   font-size: 11px;
@@ -407,6 +406,15 @@ body {
   color: #e8849a;
   white-space: nowrap;
   font-weight: 600;
+}
+
+/* 难度星级小图标（star.svg） */
+.diff-star {
+  width: 11px;
+  height: 11px;
+  margin-right: 2px;
+  vertical-align: -1px;
+  display: inline-block;
 }
 
 .board-card-biz {
@@ -502,4 +510,408 @@ body {
   .kanban-column {
     min-width: 240px;
   }
+}
+
+/* 产出日历切换筛选时的淡入过渡 */
+.calendar-fade {
+  animation: calendarFade 0.45s ease;
+}
+@keyframes calendarFade {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ===== 反思沉淀 ===== */
+.reflection-wrap {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 8px 0 24px;
+}
+.reflection-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.reflection-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+.reflection-total {
+  font-size: 13px;
+  color: var(--text-sub);
+}
+.reflection-group {
+  margin-bottom: 22px;
+}
+.reflection-group-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  user-select: none;
+}
+.reflection-group-head:hover { opacity: 0.88; }
+.reflection-group-name {
+  font-size: 15px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.reflection-group-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.reflection-group-count {
+  font-size: 12px;
+  color: var(--text-sub);
+}
+.reflection-collapse {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-sub);
+  transition: transform 0.25s ease;
+}
+.reflection-collapse.collapsed { transform: rotate(-90deg); }
+.reflection-list {
+  /* 横向优先：多列并排（flex），列内纵向堆叠，列顶对齐 */
+  display: flex;
+  align-items: flex-start;
+  gap: 12px; /* 列间距 */
+  margin-top: 12px;
+}
+.reflection-column {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* 列内卡间距 */
+}
+.reflection-item {
+  background: #fff;
+  border: 1px solid rgba(120, 135, 165, 0.14);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  box-shadow: 0 2px 8px rgba(70, 84, 110, 0.05);
+}
+.reflection-item-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.reflection-item-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  flex: 1;
+  min-width: 0;
+}
+.reflection-item-diff {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: #e8849a;
+  font-weight: 600;
+}
+.reflection-item-biz {
+  flex-shrink: 0;
+  font-size: 10px;
+  border: 1px solid;
+  border-radius: 999px;
+  padding: 0 8px;
+  line-height: 18px;
+  background: rgba(255, 255, 255, 0.6);
+}
+.reflection-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 6px 0 10px;
+}
+.reflection-item-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #7aa7f0;
+}
+.reflection-cal-icon {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+}
+.reflection-item-code {
+  display: inline-flex;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: auto; /* 代码变更数 + 星级一起右对齐 */
+}
+.reflection-item-code .ins { color: #67b26f; }
+.reflection-item-code .del { color: #e88b7c; }
+.reflection-item-body {
+  font-size: 13px;
+  line-height: 1.75;
+  color: #4a4f58;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.reflection-empty {
+  padding: 60px 0;
+  text-align: center;
+  color: #a9b0bf;
+  font-size: 14px;
+}
+
+/* 反思卡片：hover 灵动（歪一下回正） */
+.reflection-item {
+  transition: box-shadow 0.28s ease;
+}
+.reflection-item:hover {
+  animation: reflectionWiggle 0.45s ease;
+  box-shadow: 0 8px 24px rgba(70, 84, 110, 0.12);
+}
+@keyframes reflectionWiggle {
+  0%   { transform: rotate(0deg); }
+  25%  { transform: rotate(-2.5deg) translateY(-2px); }
+  55%  { transform: rotate(1.8deg) translateY(-3px); }
+  80%  { transform: rotate(-0.8deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* 底部操作区：奖牌在最左，点赞在最右 */
+.reflection-item-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(120, 135, 165, 0.12);
+}
+.reflection-foot-left {
+  display: flex;
+  align-items: center;
+}
+.reflection-like {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 999px;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.reflection-like:hover { background: rgba(232, 132, 154, 0.08); }
+.reflection-like:active { transform: scale(0.9); }
+.reflection-like:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.reflection-like:disabled:hover { background: transparent; }
+.reflection-heart { width: 15px; height: 15px; }
+.reflection-like-count { font-size: 12px; color: #8a93a5; font-weight: 500; }
+.reflection-like.liked .reflection-like-count { color: #e8849a; }
+
+/* ===== 关键成果奖牌 ===== */
+/* 看板卡片：右上角奖牌，纯白圆形背景遮罩突出显示 */
+.board-card-award {
+  position: absolute;
+  top: -4px;
+  right: 1px;
+  z-index: 2;
+  line-height: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+}
+.board-card-award img { display: block; }
+
+/* 反思卡：奖牌图标（底部操作区左侧） */
+.reflection-item-award {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 6px;
+  vertical-align: middle;
+  line-height: 0;
+}
+.reflection-item-award img { display: block; }
+
+/* ========== 数据管理后台 ========== */
+.admin-panel {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 8px 4px 16px;
+}
+.admin-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.admin-head-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.admin-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #3a4150;
+}
+.admin-desc {
+  font-size: 12px;
+  color: #8a93a5;
+  margin-top: 4px;
+}
+.admin-refreshed { color: #67b26f; }
+.admin-null { color: #c2c8d4; font-size: 12px; }
+.admin-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+.admin-arr { color: #7aa7f0; font-size: 12px; }
+.admin-diff { color: #e8849a; font-size: 12px; font-weight: 600; }
+.admin-like { color: #e87a9a; font-size: 12px; font-weight: 600; }
+.admin-mock-tip {
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: #b0832f;
+  background: #fdf6e3;
+  border: 1px solid #f0e2bd;
+  border-radius: 8px;
+  padding: 6px 12px;
+}
+/* 展开行 JSON 渲染：深色代码风格 + 内部滚动，避免撑爆页面 */
+.admin-json {
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 4px 0;
+}
+.admin-json .viewer {
+  max-height: 300px;
+}
+/* 表格容器：内容区滚动，分页器固定在底部（不随内容滚走） */
+.admin-panel .ant-table-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+.admin-panel .ant-table-container {
+  overflow: hidden;
+}
+.admin-panel .ant-table-body {
+  flex: 1;
+}
+.admin-panel .ant-table-pagination.ant-pagination {
+  margin: 8px 0 0;
+}
+/* 点击行展开 → hover 提示可点击 */
+.admin-panel .ant-table-tbody > tr.ant-table-row {
+  cursor: pointer;
+}
+.admin-panel .ant-table-tbody > tr.ant-table-row:hover > td {
+  background: #f0f5ff !important;
+}
+
+/* 导出弹窗 */
+.admin-export-desc {
+  font-size: 12px;
+  color: #8a93a5;
+  margin-bottom: 12px;
+}
+.admin-export-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.admin-export-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* 导入文件选择 */
+.admin-import-file {
+  display: block;
+  padding: 14px;
+  border: 1px dashed #c9d4e8;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+.admin-import-file:hover {
+  border-color: #7aa7f0;
+}
+.admin-import-file input {
+  display: none;
+}
+.admin-import-name {
+  font-size: 13px;
+  color: #3a4150;
+}
+.admin-import-placeholder {
+  font-size: 13px;
+  color: #a9b0bf;
+}
+
+/* ========== 看板视图切换（任务类型 / 业务线） ========== */
+.kanban-view-switch {
+  margin-bottom: 12px;
+}
+/* 业务线视图 */
+.kanban-biz {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.kanban-biz-group {
+  border: 1px solid #edf0f6;
+  border-radius: 12px;
+  padding: 10px 12px 12px;
+  background: #fff;
+}
+.kanban-biz-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f1f3f8;
+}
+.kanban-biz-name {
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.kanban-biz-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+}
+.kanban-biz-card {
+  width: 100%;
+}
+.kanban-empty-tip {
+  padding: 40px 0;
+  text-align: center;
+  color: #a9b0bf;
+  font-size: 13px;
 }

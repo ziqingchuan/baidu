@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { EventMeta } from '../types'
 import type { CategoryId } from '../lib/categories'
 import type { BusinessId } from '../lib/business'
@@ -39,13 +39,58 @@ function saveLocal(key: string, value: unknown) {
  * - popo 环境（部署页）：标注读写走 popo 动态数据（PopSDK），localStorage 双写兜底
  * - 本地 dev：无 PopSDK，仅 localStorage
  * 每个任务一条 EventMeta + 每列一个顺序记录。
+ * onSyncError：云端写失败时的回调（用于向用户提示，避免静默失败）。
  */
-export function useBoardState(businessDefaults: Record<string, BusinessId>) {
+export function useBoardState(
+  businessDefaults: Record<string, BusinessId>,
+  onSyncError?: (message: string) => void,
+) {
   // 先用 localStorage 同步初始化，保证首屏立即有数据
   const [metas, setMetas] = useState<Record<string, EventMeta>>(loadAllLocal)
   const [columnOrder, setColumnOrder] = useState<Partial<Record<CategoryId, string[]>>>(loadOrderLocal)
   // 是否已完成 popo 初始化（避免本地缓存覆盖云端）
   const [hydrated, setHydrated] = useState(false)
+  // 待同步到云端的变更队列（updater 内只记账，effect 中统一 flush，避免 StrictMode 双调用副作用）
+  const pendingSyncRef = useRef<Array<{ kind: 'meta' | 'order' | 'remove'; key: string; meta?: EventMeta; keys?: string[] }>>([])
+  const onSyncErrorRef = useRef(onSyncError)
+  onSyncErrorRef.current = onSyncError
+
+  // 统一 flush 本地持久化 + 云端写（从 pending 队列取，updater 保持纯函数）
+  const flushPending = useCallback(
+    (currentMetas: Record<string, EventMeta>, currentOrders: Partial<Record<CategoryId, string[]>>) => {
+      const pending = pendingSyncRef.current
+      if (!pending.length) return
+      pendingSyncRef.current = []
+      for (const item of pending) {
+        if (item.kind === 'meta' && item.meta) {
+          saveLocal(STORAGE_KEY, currentMetas)
+          if (isPopoReady()) {
+            upsertMeta(item.key, item.meta, businessDefaults).catch((e) => {
+              console.warn('[popo] 写入失败:', e)
+              onSyncErrorRef.current?.('云端同步失败，数据已保存在本地，刷新将重试')
+            })
+          }
+        } else if (item.kind === 'order' && item.keys) {
+          saveLocal(ORDER_KEY, currentOrders)
+          if (isPopoReady()) {
+            upsertColumnOrder(item.key as CategoryId, item.keys).catch((e) => {
+              console.warn('[popo] 顺序写入失败:', e)
+              onSyncErrorRef.current?.('云端同步失败，数据已保存在本地，刷新将重试')
+            })
+          }
+        } else if (item.kind === 'remove') {
+          saveLocal(STORAGE_KEY, currentMetas)
+          if (isPopoReady()) {
+            deleteMeta(item.key).catch((e) => {
+              console.warn('[popo] 删除失败:', e)
+              onSyncErrorRef.current?.('云端删除失败，请稍后重试')
+            })
+          }
+        }
+      }
+    },
+    [businessDefaults],
+  )
 
   // ---------- 初始加载：popo 优先，localStorage 兜底 ----------
   useEffect(() => {
@@ -66,38 +111,52 @@ export function useBoardState(businessDefaults: Record<string, BusinessId>) {
             console.warn('[popo] 迁移异常，下次加载重试:', e)
           }
         }
-        // popo 环境：从 popo 拉取，云端空则推送本地数据兜底
-        let [cloudMetas, cloudOrders] = await Promise.all([loadAllMetas(), loadAllOrders()])
-        const hasCloud = Object.keys(cloudMetas).length > 0 || Object.keys(cloudOrders).length > 0
-        if (!hasCloud) {
-          // popo 空：把本地数据推到 popo
-          const localM = loadAllLocal()
-          const localO = loadOrderLocal()
-          if (Object.keys(localM).length) {
-            for (const [key, m] of Object.entries(localM)) {
-              try {
-                await upsertMeta(key, m, businessDefaults)
-              } catch (e) {
-                console.warn('[popo] 初始化同步失败:', e)
-              }
-            }
+        // popo 环境：从 popo 拉取，并与本地按 updatedAt 逐条合并（避免云端旧快照覆盖本地新标注）
+        const [cloudMetas, cloudOrders] = await Promise.all([loadAllMetas(), loadAllOrders()])
+        const localM = loadAllLocal()
+        const localO = loadOrderLocal()
+
+        // 标注合并：取 updatedAt 更新的那条；云端缺失或本地更新的记录保留，并回推 popo
+        const mergedMetas: Record<string, EventMeta> = {}
+        const pushMetaKeys: string[] = []
+        for (const [key, lm] of Object.entries(localM)) {
+          const cm = cloudMetas[key]
+          if (!cm || lm.updatedAt > cm.updatedAt) {
+            mergedMetas[key] = lm
+            pushMetaKeys.push(key)
+          } else {
+            mergedMetas[key] = cm
           }
-          for (const [cat, keys] of Object.entries(localO)) {
+        }
+        for (const [key, cm] of Object.entries(cloudMetas)) {
+          if (!mergedMetas[key]) mergedMetas[key] = cm
+        }
+
+        // 列顺序合并：本地有而云端缺失的列回推 popo
+        const mergedOrders: Partial<Record<CategoryId, string[]>> = { ...cloudOrders }
+        for (const [cat, keys] of Object.entries(localO)) {
+          if (keys?.length && !mergedOrders[cat as CategoryId]) {
+            mergedOrders[cat as CategoryId] = keys
             try {
               await upsertColumnOrder(cat as CategoryId, keys ?? [])
             } catch (e) {
               console.warn('[popo] 顺序初始化同步失败:', e)
             }
           }
-          ;[cloudMetas, cloudOrders] = await Promise.all([loadAllMetas(), loadAllOrders()])
+        }
+        // 本地独有的标注推送到 popo（幂等 upsert，失败留待下次）
+        for (const key of pushMetaKeys) {
+          try {
+            await upsertMeta(key, mergedMetas[key], businessDefaults)
+          } catch (e) {
+            console.warn('[popo] 初始化同步失败:', e)
+          }
         }
         if (cancelled) return
-        const finalMetas = Object.keys(cloudMetas).length ? cloudMetas : loadAllLocal()
-        const finalOrders = Object.keys(cloudOrders).length ? cloudOrders : loadOrderLocal()
-        setMetas(finalMetas)
-        setColumnOrder(finalOrders)
-        saveLocal(STORAGE_KEY, finalMetas)
-        saveLocal(ORDER_KEY, finalOrders)
+        setMetas(mergedMetas)
+        setColumnOrder(mergedOrders)
+        saveLocal(STORAGE_KEY, mergedMetas)
+        saveLocal(ORDER_KEY, mergedOrders)
       } catch (err) {
         console.warn('[popo] 加载失败，使用本地缓存:', err)
       } finally {
@@ -111,7 +170,7 @@ export function useBoardState(businessDefaults: Record<string, BusinessId>) {
     }
   }, [businessDefaults])
 
-  // ---------- 写入：localStorage 即时 + popo 异步（见 patch / saveColumnOrder） ----------
+  // ---------- 写入：updater 只算新状态，副作用经 flushPending 统一处理 ----------
 
   /** 更新某个任务的部分字段 */
   const patch = useCallback(
@@ -122,20 +181,21 @@ export function useBoardState(businessDefaults: Record<string, BusinessId>) {
           difficulty: patchData.difficulty ?? prev[eventKey]?.difficulty ?? 0,
           reflection: patchData.reflection ?? prev[eventKey]?.reflection ?? '',
           business: patchData.business ?? prev[eventKey]?.business,
+          // null = 清除奖牌；undefined = 保持不变
+          award: (patchData.award === null ? undefined : patchData.award ?? prev[eventKey]?.award) as EventMeta['award'],
           updatedAt: new Date().toISOString(),
         }
-        const all = { ...prev, [eventKey]: next }
-        saveLocal(STORAGE_KEY, all)
-        if (isPopoReady()) {
-          upsertMeta(eventKey, next, businessDefaults).catch((e) => {
-            console.warn('[popo] 写入失败:', e)
-          })
-        }
-        return all
+        pendingSyncRef.current.push({ kind: 'meta', key: eventKey, meta: next })
+        return { ...prev, [eventKey]: next }
       })
     },
-    [businessDefaults],
+    [],
   )
+
+  // 每次 metas / columnOrder 变化后统一 flush 副作用（localStorage 即时 + 云端异步）
+  useEffect(() => {
+    flushPending(metas, columnOrder)
+  }, [metas, columnOrder, flushPending])
 
   const setCategory = useCallback(
     (eventKey: string, category: CategoryId) => patch(eventKey, { category }),
@@ -153,18 +213,18 @@ export function useBoardState(businessDefaults: Record<string, BusinessId>) {
     (eventKey: string, business: BusinessId) => patch(eventKey, { business }),
     [patch],
   )
+  const setAward = useCallback(
+    (eventKey: string, award: 'gold' | 'silver' | 'copper' | null) =>
+      patch(eventKey, { award: award ?? null } as unknown as Partial<Omit<EventMeta, 'updatedAt'>>),
+    [patch],
+  )
 
   const remove = useCallback(
     (eventKey: string) => {
       setMetas((prev) => {
         const all = { ...prev }
         delete all[eventKey]
-        saveLocal(STORAGE_KEY, all)
-        if (isPopoReady()) {
-          deleteMeta(eventKey).catch((e) => {
-            console.warn('[popo] 删除失败:', e)
-          })
-        }
+        pendingSyncRef.current.push({ kind: 'remove', key: eventKey })
         return all
       })
     },
@@ -175,12 +235,7 @@ export function useBoardState(businessDefaults: Record<string, BusinessId>) {
     (category: CategoryId, keys: string[]) => {
       setColumnOrder((prev) => {
         const next = { ...prev, [category]: keys }
-        saveLocal(ORDER_KEY, next)
-        if (isPopoReady()) {
-          upsertColumnOrder(category, keys).catch((e) => {
-            console.warn('[popo] 顺序写入失败:', e)
-          })
-        }
+        pendingSyncRef.current.push({ kind: 'order', key: category, keys })
         return next
       })
     },
@@ -206,5 +261,5 @@ export function useBoardState(businessDefaults: Record<string, BusinessId>) {
     }
   }, [businessDefaults])
 
-  return { metas, setCategory, setDifficulty, setReflection, setBusiness, remove, columnOrder, saveColumnOrder, hydrated, syncLocalToCloud }
+  return { metas, setCategory, setDifficulty, setReflection, setBusiness, setAward, remove, columnOrder, saveColumnOrder, hydrated, syncLocalToCloud }
 }

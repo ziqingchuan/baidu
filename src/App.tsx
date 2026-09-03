@@ -1,20 +1,21 @@
 import { useMemo, useState } from 'react'
 import { ConfigProvider, App as AntApp, Segmented, Tooltip, Select, theme, Modal, Input, Popconfirm } from 'antd'
-import { DownloadOutlined, CloudUploadOutlined } from '@ant-design/icons'
+import { CloudUploadOutlined } from '@ant-design/icons'
 import zhCN from 'antd/locale/zh_CN'
 import { useDashboardData } from './lib/useDashboardData'
 import { useBoardState } from './hooks/useBoardState'
 import { buildBoardStats } from './lib/boardStats'
 import { buildExtraStats } from './lib/extraStats'
-import { exportBoardMarkdown, downloadText } from './lib/export'
 import { isAuthed, setAuthed, checkPassword } from './lib/mockAuth'
 import KanbanBoard from './components/KanbanBoard'
 import ChartsSection from './components/ChartsSection'
+import ReflectionWall from './components/ReflectionWall'
+import DataAdmin from './components/DataAdmin'
 import Button from './components/ui/Button'
 import type { EventItem } from './types'
 import type { BusinessId } from './lib/business'
 
-type View = 'board' | 'charts'
+type View = 'board' | 'charts' | 'reflection' | 'admin'
 
 /** 由日期推导季度，如 2026-05 -> "2026-Q2" */
 function dateQuarter(date: string): string {
@@ -50,10 +51,27 @@ function AppContent() {
     for (const e of dash.events) m[e.key] = e.business
     return m
   }, [dash.events])
-  const board = useBoardState(businessDefaults)
   const { message } = AntApp.useApp()
-  const [view, setView] = useState<View>('charts')
-  const [quarter, setQuarter] = useState<string>('all')
+  const board = useBoardState(businessDefaults, (msg) => {
+    message.warning(msg)
+  })
+  // 当前浏览 tab 记忆在 localStorage，刷新后恢复（admin 仅登录有效，未登录回落到 charts）
+  const [view, setViewState] = useState<View>(() => {
+    const saved = localStorage.getItem('output-dashboard:view')
+    const valid = saved === 'board' || saved === 'charts' || saved === 'reflection' || saved === 'admin'
+    if (!valid) return 'charts'
+    return saved === 'admin' && !isAuthed ? 'charts' : (saved as View)
+  })
+  const setView = (v: View) => {
+    setViewState(v)
+    localStorage.setItem('output-dashboard:view', v)
+  }
+  // 季度筛选记忆在 localStorage，刷新后恢复
+  const [quarter, setQuarterState] = useState<string>(() => localStorage.getItem('output-dashboard:quarter') ?? 'all')
+  const setQuarter = (q: string) => {
+    setQuarterState(q)
+    localStorage.setItem('output-dashboard:quarter', q)
+  }
   const [syncing, setSyncing] = useState(false)
   // 同步到云端的逻辑保留，按钮暂不显示（置为 true 即恢复显示）
   const showSyncButton = false
@@ -84,7 +102,7 @@ function AppContent() {
     message.info('已退出登录')
   }
 
-  /** 手动把本地数据同步到 Supabase 云端 */
+  /** 手动把本地数据同步到 popo 云端 */
   const handleSyncToCloud = async () => {
     setSyncing(true)
     try {
@@ -107,17 +125,11 @@ function AppContent() {
     [filteredEvents, board.metas],
   )
 
-  // 附加统计：基于全部任务（不随季度过滤），供图表页展示
+  // 附加统计：随季度筛选（所有图表都跟随筛选变化）
   const extra = useMemo(
-    () => buildExtraStats(dash.events, board.metas),
-    [dash.events, board.metas],
+    () => buildExtraStats(filteredEvents, board.metas),
+    [filteredEvents, board.metas],
   )
-
-  const handleExport = () => {
-    const md = exportBoardMarkdown(filteredEvents, board.metas)
-    const suffix = quarter === 'all' ? '全部' : quarter
-    downloadText(`度厂观测站-${suffix}-${new Date().toISOString().slice(0, 10)}.md`, md)
-  }
 
   return (
     <>
@@ -157,19 +169,19 @@ function AppContent() {
                 onChange={(v) => setView(v as View)}
                 options={[
                   { value: 'charts', label: '数据图表' },
-                  { value: 'board', label: '任务看板' },
+                  { value: 'board', label: '产出看板' },
+                  { value: 'reflection', label: '反思沉淀' },
+                  // 数据管理后台：仅登录后可见
+                  ...(authed ? [{ value: 'admin' as View, label: '数据管理' }] : []),
                 ]}
               />
               {showSyncButton && (
-                <Tooltip title="把本地 localStorage 数据上传到 Supabase 云端">
+                <Tooltip title="把本地 localStorage 数据上传到 popo 云端">
                   <Button icon={<CloudUploadOutlined />} onClick={handleSyncToCloud} loading={syncing}>
                     同步到云端
                   </Button>
                 </Tooltip>
               )}
-              <Button icon={<DownloadOutlined />} onClick={handleExport} type="primary">
-                导出总结
-              </Button>
               {authed ? (
                 <Popconfirm title="确定退出登录？" onConfirm={handleLogout} okText="退出" cancelText="取消">
                   <button type="button" className="auth-avatar" title="退出登录">
@@ -196,16 +208,21 @@ function AppContent() {
                 setDifficulty={board.setDifficulty}
                 setReflection={board.setReflection}
                 setBusiness={board.setBusiness}
+                setAward={board.setAward}
                 saveColumnOrder={board.saveColumnOrder}
                 editable={authed}
               />
+            ) : view === 'reflection' ? (
+              <ReflectionWall events={filteredEvents} metas={board.metas} />
+            ) : view === 'admin' && authed ? (
+              <DataAdmin />
             ) : (
               <ChartsSection stats={stats} extra={extra} />
             )}
           </main>
 
           <footer className="app-footer">
-            数据来源：iCode（CR/提交）+ iCafe（卡片）· 快照更新于 {dash.fetchedAt.slice(0, 10)} · 拖拽卡片到对应分类即可归类
+            数据来源：iCode（CR/提交）+ iCafe（卡片）· 快照更新于 {dash.fetchedAt.slice(0, 10)}
           </footer>
       </div>
 

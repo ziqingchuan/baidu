@@ -42,6 +42,7 @@ interface Props {
   setDifficulty: (key: string, difficulty: number) => void
   setReflection: (key: string, reflection: string) => void
   setBusiness: (key: string, business: BusinessId) => void
+  setAward: (key: string, award: 'gold' | 'silver' | 'copper' | null) => void
   saveColumnOrder: (category: CategoryId, keys: string[]) => void
   /** 是否已登录（未登录：只读，禁拖拽/禁编辑/禁排序） */
   editable: boolean
@@ -111,7 +112,7 @@ function UnassignedShell({
   )
 }
 
-export default function KanbanBoard({ events, metas, columnOrder, setCategory, setDifficulty, setReflection, setBusiness, saveColumnOrder, editable }: Props) {
+export default function KanbanBoard({ events, metas, columnOrder, setCategory, setDifficulty, setReflection, setBusiness, setAward, saveColumnOrder, editable }: Props) {
   const { message } = AntApp.useApp()
   const [activeId, setActiveId] = useState<string | null>(null)
   const [editKey, setEditKey] = useState<string | null>(null)
@@ -451,6 +452,7 @@ export default function KanbanBoard({ events, metas, columnOrder, setCategory, s
         onClose={() => setEditKey(null)}
         onSave={handleEditSave}
         onBusinessChange={(b) => editingEvent && setBusiness(editingEvent.key, b)}
+        onAwardChange={(a) => editingEvent && setAward(editingEvent.key, a)}
       />
     </DndContext>
   )
