@@ -4,6 +4,7 @@ import { defineConfig } from 'vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: '/baidu/',
   build: {
     // echarts / antd 体积大，拆成独立 chunk，避免单个 bundle 过大
     rolldownOptions: {

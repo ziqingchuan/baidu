@@ -2,11 +2,9 @@ import ReactECharts from 'echarts-for-react'
 import { Card, Col, Row } from 'antd'
 import type { BoardStats } from '../lib/boardStats'
 import type { ExtraStats } from '../lib/extraStats'
-import type { EventItem, EventMeta } from '../types'
 import { CATEGORIES, UNASSIGNED_CATEGORY } from '../lib/categories'
 import { BUSINESSES } from '../lib/business'
 import { chartBase, barRadius, softFill } from '../lib/chartTheme'
-import AchievementWall from './AchievementWall'
 
 /** 分类分布环形图（任务数，任务导向） */
 function CategoryDonut({ stats }: { stats: BoardStats }) {
@@ -521,23 +519,17 @@ function BizRepoTreemap({ extra }: { extra: ExtraStats }) {
   )
 }
 
-/** 图表区：自上而下 = 整体规模 → 业务分布 → 工作节奏 → 分类趋势 → 代码质量 → 成就勋章
+/** 图表区：自上而下 = 整体规模 → 业务分布 → 工作节奏 → 分类趋势 → 代码质量
  *  extra = 随季度筛选的数据（所有图都跟随筛选） */
 export default function ChartsSection({
   stats,
   extra,
-  events,
-  metas,
 }: {
   stats: BoardStats
   extra: ExtraStats
-  events: EventItem[]
-  metas: Record<string, EventMeta>
 }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* 成就勋章：置顶占满宽度，全量展示，未解锁置灰 */}
-      <AchievementWall events={events} metas={metas} />
       {/* 整体规模：产出日历 + 关键词（跟随筛选） */}
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={16}>

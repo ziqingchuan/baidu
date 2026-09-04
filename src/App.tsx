@@ -10,11 +10,12 @@ import { dateQuarter } from './lib/dateQuarter'
 import KanbanBoard from './components/KanbanBoard'
 import ChartsSection from './components/ChartsSection'
 import ReflectionWall from './components/ReflectionWall'
+import AchievementWall from './components/AchievementWall'
 import DataAdmin from './components/DataAdmin'
 import type { EventItem } from './types'
 import type { BusinessId } from './lib/business'
 
-type View = 'board' | 'charts' | 'reflection' | 'admin'
+type View = 'board' | 'charts' | 'reflection' | 'achievements' | 'admin'
 
 /** 从任务列表推导可选季度（倒序） */
 function listQuarters(events: EventItem[]): string[] {
@@ -66,7 +67,7 @@ function AppContent() {
   // 当前浏览 tab 记忆在 localStorage，刷新后恢复（admin 仅登录有效，未登录回落到 charts）
   const [view, setViewState] = useState<View>(() => {
     const saved = localStorage.getItem('output-dashboard:view')
-    const valid = saved === 'board' || saved === 'charts' || saved === 'reflection' || saved === 'admin'
+    const valid = saved === 'board' || saved === 'charts' || saved === 'reflection' || saved === 'achievements' || saved === 'admin'
     if (!valid) return 'charts'
     return saved === 'admin' && !isAuthed ? 'charts' : (saved as View)
   })
@@ -164,6 +165,7 @@ function AppContent() {
                   { value: 'charts', label: '数据图表' },
                   { value: 'board', label: '产出看板' },
                   { value: 'reflection', label: '反思沉淀' },
+                  { value: 'achievements', label: '成就勋章' },
                   // 数据管理后台：仅登录后可见
                   ...(authed ? [{ value: 'admin' as View, label: '数据管理' }] : []),
                 ]}
@@ -202,11 +204,12 @@ function AppContent() {
               />
             ) : view === 'reflection' ? (
               <ReflectionWall events={filteredEvents} metas={board.metas} />
+            ) : view === 'achievements' ? (
+              <AchievementWall events={dash.events} metas={board.metas} />
             ) : view === 'admin' && authed ? (
               <DataAdmin />
             ) : (
-              // 成就勋章用全量数据（历史累积），不随季度筛选
-              <ChartsSection stats={stats} extra={extra} events={dash.events} metas={board.metas} />
+              <ChartsSection stats={stats} extra={extra} />
             )}
           </main>
 

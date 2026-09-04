@@ -118,6 +118,28 @@ function maxTasksPerBusiness(events: EventItem[], metas: Record<string, EventMet
   return Math.max(0, ...m.values())
 }
 
+// ---------- 成就分组（评价维度）：勋章墙按此分组展示 ----------
+
+export interface AchievementGroupDef {
+  id: string
+  /** 分组小标题 */
+  name: string
+  /** 一句话说明这个维度在评价什么 */
+  desc: string
+  /** 该维度包含的成就 id（按展示顺序） */
+  ids: string[]
+}
+
+export const ACHIEVEMENT_GROUPS: AchievementGroupDef[] = [
+  { id: 'onboarding', name: '起步', desc: '迈出第一步', ids: ['first-task', 'hard-1'] },
+  { id: 'engineering', name: '工程攻坚', desc: '能扛高难度 / 复杂工程，会重构与工程化建设', ids: ['hard-5', 'delete-5000', 'engineering-5'] },
+  { id: 'quality', name: '质量保障', desc: '交付可靠，善于定位与修复问题', ids: ['bugfix-5', 'hard-bug-5'] },
+  { id: 'outcome', name: '关键成果', desc: '做出被认可的核心产出', ids: ['copper-1', 'silver-3', 'first-gold', 'gold-3', 'awards-10', 'grand-slam'] },
+  { id: 'breadth', name: '广度深耕', desc: '技术视野广、业务理解深', ids: ['category-5', 'business-3', 'business-10'] },
+  { id: 'consistency', name: '持续高效', desc: '产出稳定持续、规模可观', ids: ['workday-5', 'month-full', 'quarters-4', 'day-5', 'tasks-50', 'tasks-100', 'lines-10000'] },
+  { id: 'reflection', name: '复盘沉淀', desc: '善于总结反思、自我迭代', ids: ['reflection-10', 'reflection-deep'] },
+]
+
 // ---------- 成就定义（顺序即勋章墙展示顺序） ----------
 
 export const ACHIEVEMENTS: AchievementDef[] = [
@@ -131,75 +153,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     progress: (e) => ({ current: Math.min(e.length, 1), target: 1 }),
   },
 
-  // ---------- 坚持 · 节奏（工作日才计，周末自动跳过） ----------
-  {
-    id: 'workday-5',
-    name: '持续输出',
-    desc: '连续 5 个工作日都有产出。',
-    icon: medalIcon('workday-5'),
-    check: (e) => maxConsecutiveWorkdays(e) >= 5,
-    progress: (e) => ({ current: Math.min(maxConsecutiveWorkdays(e), 5), target: 5 }),
-  },
-  {
-    id: 'month-full',
-    name: '火力全开',
-    desc: '本月所有工作日都有产出。',
-    icon: medalIcon('month-full'),
-    check: (e) => currentMonthWorkdays(e) >= workdaysInCurrentMonth(),
-    progress: (e) => ({ current: Math.min(currentMonthWorkdays(e), workdaysInCurrentMonth()), target: workdaysInCurrentMonth() }),
-  },
-  {
-    id: 'quarters-4',
-    name: '长期主义',
-    desc: '连续 4 个季度持续产出。',
-    icon: medalIcon('quarters-4'),
-    check: (e) => quarterCount(e) >= 4,
-    progress: (e) => ({ current: Math.min(quarterCount(e), 4), target: 4 }),
-  },
-  {
-    id: 'day-5',
-    name: '高效一日',
-    desc: '单日完成 5 个任务。',
-    icon: medalIcon('day-5'),
-    check: (e) => maxTasksPerDay(e) >= 5,
-    progress: (e) => ({ current: Math.min(maxTasksPerDay(e), 5), target: 5 }),
-  },
-
-  // ---------- 规模 · 里程碑 ----------
-  {
-    id: 'tasks-50',
-    name: '渐入佳境',
-    desc: '累计完成 50 个任务。',
-    icon: medalIcon('tasks-50'),
-    check: (e) => e.length >= 50,
-    progress: (e) => ({ current: Math.min(e.length, 50), target: 50 }),
-  },
-  {
-    id: 'tasks-100',
-    name: '百炼成钢',
-    desc: '累计完成 100 个任务。',
-    icon: medalIcon('tasks-100'),
-    check: (e) => e.length >= 100,
-    progress: (e) => ({ current: Math.min(e.length, 100), target: 100 }),
-  },
-  {
-    id: 'lines-10000',
-    name: '万码初筑',
-    desc: '累计新增 10000 行代码。',
-    icon: medalIcon('lines-10000'),
-    check: (e) => e.reduce((a, x) => a + x.insertions, 0) >= 10000,
-    progress: (e) => ({ current: Math.min(e.reduce((a, x) => a + x.insertions, 0), 10000), target: 10000 }),
-  },
-  {
-    id: 'delete-5000',
-    name: '重构高手',
-    desc: '累计删除 5000 行代码（清理/重构）。',
-    icon: medalIcon('delete-5000'),
-    check: (e) => e.reduce((a, x) => a + x.deletions, 0) >= 5000,
-    progress: (e) => ({ current: Math.min(e.reduce((a, x) => a + x.deletions, 0), 5000), target: 5000 }),
-  },
-
-  // ---------- 攻坚 · 难度 ----------
+  // ---------- 工程攻坚：能扛高难度 / 复杂工程，会重构与工程化建设 ----------
   {
     id: 'hard-1',
     name: '初攀高峰',
@@ -217,6 +171,32 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     progress: (_e, m) => ({ current: Math.min(Object.values(m).filter((x) => x.difficulty >= 4).length, 5), target: 5 }),
   },
   {
+    id: 'delete-5000',
+    name: '重构高手',
+    desc: '累计删除 5000 行代码（清理/重构）。',
+    icon: medalIcon('delete-5000'),
+    check: (e) => e.reduce((a, x) => a + x.deletions, 0) >= 5000,
+    progress: (e) => ({ current: Math.min(e.reduce((a, x) => a + x.deletions, 0), 5000), target: 5000 }),
+  },
+  {
+    id: 'engineering-5',
+    name: '工程卫士',
+    desc: '完成 5 个工程建设类任务。',
+    icon: medalIcon('engineering-5'),
+    check: (e, m) => e.filter((x) => categoryOf(x, m) === 'engineering').length >= 5,
+    progress: (e, m) => ({ current: Math.min(e.filter((x) => categoryOf(x, m) === 'engineering').length, 5), target: 5 }),
+  },
+
+  // ---------- 质量保障：交付可靠，善于定位与修复问题 ----------
+  {
+    id: 'bugfix-5',
+    name: '捕虫达人',
+    desc: '修复了 5 个 Bug。',
+    icon: medalIcon('bugfix-5'),
+    check: (e, m) => e.filter((x) => categoryOf(x, m) === 'bugfix').length >= 5,
+    progress: (e, m) => ({ current: Math.min(e.filter((x) => categoryOf(x, m) === 'bugfix').length, 5), target: 5 }),
+  },
+  {
     id: 'hard-bug-5',
     name: '捕虫专家',
     desc: '完成 5 个难度 3+ 的 Bug 修复。',
@@ -228,7 +208,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     }),
   },
 
-  // ---------- 奖牌 · 关键成果 ----------
+  // ---------- 关键成果：做出被认可的核心产出（奖牌） ----------
   {
     id: 'copper-1',
     name: '铜牌新星',
@@ -284,28 +264,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     },
   },
 
-  // ---------- 反思 · 沉淀 ----------
-  {
-    id: 'reflection-10',
-    name: '省思行者',
-    desc: '写了 10 次总结反思。',
-    icon: medalIcon('reflection-10'),
-    check: (_e, m) => Object.values(m).filter((x) => x.reflection?.trim()).length >= 10,
-    progress: (_e, m) => ({ current: Math.min(Object.values(m).filter((x) => x.reflection?.trim()).length, 10), target: 10 }),
-  },
-  {
-    id: 'reflection-deep',
-    name: '深度反思',
-    desc: '写过一篇超过 200 字的总结反思。',
-    icon: medalIcon('reflection-deep'),
-    check: (_e, m) => Object.values(m).some((x) => (x.reflection?.trim()?.length ?? 0) > 200),
-    progress: (_e, m) => ({
-      current: Math.min(Math.max(...Object.values(m).map((x) => x.reflection?.trim()?.length ?? 0), 0), 200),
-      target: 200,
-    }),
-  },
-
-  // ---------- 广度 · 涉猎（累计覆盖 N 个，不依赖业务总数） ----------
+  // ---------- 广度深耕：技术视野广、业务理解深 ----------
   {
     id: 'category-5',
     name: '全面探索',
@@ -325,8 +284,6 @@ export const ACHIEVEMENTS: AchievementDef[] = [
       target: 3,
     }),
   },
-
-  // ---------- 专注 · 深耕 ----------
   {
     id: 'business-10',
     name: '深耕一隅',
@@ -336,21 +293,82 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     progress: (e, m) => ({ current: Math.min(maxTasksPerBusiness(e, m), 10), target: 10 }),
   },
 
-  // ---------- 工程 · 治理 ----------
+  // ---------- 持续高效：产出稳定持续、规模可观 ----------
   {
-    id: 'bugfix-5',
-    name: '捕虫达人',
-    desc: '修复了 5 个 Bug。',
-    icon: medalIcon('bugfix-5'),
-    check: (e, m) => e.filter((x) => categoryOf(x, m) === 'bugfix').length >= 5,
-    progress: (e, m) => ({ current: Math.min(e.filter((x) => categoryOf(x, m) === 'bugfix').length, 5), target: 5 }),
+    id: 'workday-5',
+    name: '持续输出',
+    desc: '连续 5 个工作日都有产出。',
+    icon: medalIcon('workday-5'),
+    check: (e) => maxConsecutiveWorkdays(e) >= 5,
+    progress: (e) => ({ current: Math.min(maxConsecutiveWorkdays(e), 5), target: 5 }),
   },
   {
-    id: 'engineering-5',
-    name: '工程卫士',
-    desc: '完成 5 个工程建设类任务。',
-    icon: medalIcon('engineering-5'),
-    check: (e, m) => e.filter((x) => categoryOf(x, m) === 'engineering').length >= 5,
-    progress: (e, m) => ({ current: Math.min(e.filter((x) => categoryOf(x, m) === 'engineering').length, 5), target: 5 }),
+    id: 'month-full',
+    name: '火力全开',
+    desc: '本月所有工作日都有产出。',
+    icon: medalIcon('month-full'),
+    check: (e) => currentMonthWorkdays(e) >= workdaysInCurrentMonth(),
+    progress: (e) => ({ current: Math.min(currentMonthWorkdays(e), workdaysInCurrentMonth()), target: workdaysInCurrentMonth() }),
+  },
+  {
+    id: 'quarters-4',
+    name: '长期主义',
+    desc: '连续 4 个季度持续产出。',
+    icon: medalIcon('quarters-4'),
+    check: (e) => quarterCount(e) >= 4,
+    progress: (e) => ({ current: Math.min(quarterCount(e), 4), target: 4 }),
+  },
+  {
+    id: 'day-5',
+    name: '高效一日',
+    desc: '单日完成 5 个任务。',
+    icon: medalIcon('day-5'),
+    check: (e) => maxTasksPerDay(e) >= 5,
+    progress: (e) => ({ current: Math.min(maxTasksPerDay(e), 5), target: 5 }),
+  },
+  {
+    id: 'tasks-50',
+    name: '渐入佳境',
+    desc: '累计完成 50 个任务。',
+    icon: medalIcon('tasks-50'),
+    check: (e) => e.length >= 50,
+    progress: (e) => ({ current: Math.min(e.length, 50), target: 50 }),
+  },
+  {
+    id: 'tasks-100',
+    name: '百炼成钢',
+    desc: '累计完成 100 个任务。',
+    icon: medalIcon('tasks-100'),
+    check: (e) => e.length >= 100,
+    progress: (e) => ({ current: Math.min(e.length, 100), target: 100 }),
+  },
+  {
+    id: 'lines-10000',
+    name: '万码初筑',
+    desc: '累计新增 10000 行代码。',
+    icon: medalIcon('lines-10000'),
+    check: (e) => e.reduce((a, x) => a + x.insertions, 0) >= 10000,
+    progress: (e) => ({ current: Math.min(e.reduce((a, x) => a + x.insertions, 0), 10000), target: 10000 }),
+  },
+
+  // ---------- 复盘沉淀：善于总结反思、自我迭代 ----------
+  {
+    id: 'reflection-10',
+    name: '省思行者',
+    desc: '写了 10 次总结反思。',
+    icon: medalIcon('reflection-10'),
+    check: (_e, m) => Object.values(m).filter((x) => x.reflection?.trim()).length >= 10,
+    progress: (_e, m) => ({ current: Math.min(Object.values(m).filter((x) => x.reflection?.trim()).length, 10), target: 10 }),
+  },
+  {
+    id: 'reflection-deep',
+    name: '深度反思',
+    desc: '写过一篇超过 200 字的总结反思。',
+    icon: medalIcon('reflection-deep'),
+    check: (_e, m) => Object.values(m).some((x) => (x.reflection?.trim()?.length ?? 0) > 200),
+    progress: (_e, m) => ({
+      current: Math.min(Math.max(...Object.values(m).map((x) => x.reflection?.trim()?.length ?? 0), 0), 200),
+      target: 200,
+    }),
   },
 ]

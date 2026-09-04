@@ -959,6 +959,34 @@ body {
   gap: 20px 16px;
   justify-items: center;
 }
+/* 成就分组（评价维度）：每组一个小标题 + 说明 + 该组勋章 */
+.ach-group {
+  margin-bottom: 18px;
+}
+.ach-group:last-child {
+  margin-bottom: 0;
+}
+.ach-group-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.ach-group-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #4a4f58;
+  margin-left: 20px;
+}
+.ach-group-desc {
+  font-size: 11px;
+  color: #9aa0ab;
+}
+.ach-group-count {
+  margin-left: auto;
+  font-size: 11px;
+  color: #b8bcc4;
+}
 .ach-item {
   display: flex;
   flex-direction: column;

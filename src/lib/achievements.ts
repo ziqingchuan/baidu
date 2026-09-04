@@ -3,7 +3,8 @@
  * 成就「数据」（名称 / 描述 / 达成条件 / 展示顺序）已移到 src/data/achievements.ts，改数据去那边改。
  */
 import type { EventItem, EventMeta } from '../types'
-import { ACHIEVEMENTS, MEDAL_ICONS } from '../data/achievements'
+import { ACHIEVEMENTS, ACHIEVEMENT_GROUPS, MEDAL_ICONS } from '../data/achievements'
+import type { AchievementGroupDef } from '../data/achievements'
 
 export interface AchievementDef {
   id: string
@@ -26,6 +27,17 @@ export function achievementStatuses(events: EventItem[], metas: Record<string, E
     unlocked: a.check(events, metas),
     progress: a.progress ? a.progress(events, metas) : undefined,
   }))
+}
+
+/** 按评价维度分组的解锁状态，供勋章墙分组展示（空组过滤掉） */
+export function achievementStatusesByGroup(events: EventItem[], metas: Record<string, EventMeta>) {
+  const statuses = achievementStatuses(events, metas)
+  return ACHIEVEMENT_GROUPS.map((g: AchievementGroupDef) => ({
+    ...g,
+    items: g.ids
+      .map((id) => statuses.find((s) => s.id === id))
+      .filter((s): s is Exclude<typeof s, undefined> => Boolean(s)),
+  })).filter((g) => g.items.length)
 }
 
 // ---------- 勋章图预加载（进入浏览器缓存，避免切换/刷新时重复请求） ----------
