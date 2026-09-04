@@ -1,18 +1,18 @@
 /**
  * 成就勋章数据（可编辑）：想改成就的「名称 / 描述 / 达成条件 / 展示顺序」，直接改这个文件。
- * 勋章图：src/assets/achievements/{id}.png（文件名即成就 id，新增成就把对应 png 放进目录即可）。
+ * 勋章图：src/assets/achievements/{id}.webp（文件名即成就 id）。新增成就时把 png 放进目录后执行 pnpm to-webp 生成 webp。
  */
 import type { AchievementDef } from '../lib/achievements'
 import { dateQuarter } from '../lib/dateQuarter'
 import type { EventItem, EventMeta } from '../types'
 import type { CategoryId } from '../lib/categories'
 
-/** 勋章图：按 id 自动加载 src/assets/achievements/ 下所有 png（文件名即成就 id，如 workday-5.png → id workday-5） */
-const medalModules = import.meta.glob('../assets/achievements/*.png', { eager: true, import: 'default' }) as Record<string, string>
+/** 勋章图：按 id 自动加载 src/assets/achievements/ 下所有 webp（文件名即成就 id，如 workday-5.webp → id workday-5） */
+const medalModules = import.meta.glob('../assets/achievements/*.webp', { eager: true, import: 'default' }) as Record<string, string>
 
 export const MEDAL_ICONS: Record<string, string> = Object.fromEntries(
   Object.entries(medalModules).map(([path, url]) => {
-    const id = path.split('/').pop()!.replace(/\.png$/, '')
+    const id = path.split('/').pop()!.replace(/\.webp$/, '')
     return [id, url]
   }),
 )

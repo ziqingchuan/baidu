@@ -9,8 +9,8 @@ import { isAuthed, setAuthed, checkPassword } from './lib/mockAuth'
 import { dateQuarter } from './lib/dateQuarter'
 import KanbanBoard from './components/KanbanBoard'
 import ReflectionWall from './components/ReflectionWall'
-import avatarPng from './assets/avatar.png'
-import notsignedPng from './assets/notsigned.png'
+import avatarPng from './assets/avatar.webp'
+import notsignedPng from './assets/notsigned.webp'
 
 // 重页面懒加载：echarts（数据图表）、勋章图（成就）、xlsx（数据管理）等大依赖按需下载
 const ChartsSection = lazy(() => import('./components/ChartsSection'))
