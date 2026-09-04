@@ -12,13 +12,16 @@ import {
   PolarComponent, RadarComponent, CalendarComponent, VisualMapComponent,
 } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
+import { LabelLayout } from 'echarts/features'
 
-// 按需注册（新增图表类型时在此补充对应 Chart / Component，否则不渲染）
+// 按需注册（新增图表类型时在此补充对应 Chart / Component / Feature，否则不生效）
 echarts.use([
   BarChart, LineChart, PieChart, RadarChart, HeatmapChart, ScatterChart, TreemapChart,
   TitleComponent, TooltipComponent, GridComponent, LegendComponent,
   PolarComponent, RadarComponent, CalendarComponent, VisualMapComponent,
   CanvasRenderer,
+  // 树图细长矩形 label 旋转等依赖 labelLayout 功能，不注册会静默忽略
+  LabelLayout,
 ])
 
 /** 模块化 echarts 实例，供 echarts-for-react core 使用 */
