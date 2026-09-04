@@ -15,6 +15,8 @@ function MedalImg({ src, alt }: { src: string; alt: string }) {
     <img
       src={src}
       alt={alt}
+      loading="lazy"
+      decoding="async"
       className={`ach-medal-img${loaded ? ' loaded' : ''}`}
       onLoad={() => setLoaded(true)}
     />

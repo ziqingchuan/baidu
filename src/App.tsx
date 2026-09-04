@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { ConfigProvider, App as AntApp, Segmented, Tooltip, Select, theme, Modal, Input, Popconfirm } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
 import { useDashboardData } from './lib/useDashboardData'
@@ -8,12 +8,14 @@ import { buildExtraStats } from './lib/extraStats'
 import { isAuthed, setAuthed, checkPassword } from './lib/mockAuth'
 import { dateQuarter } from './lib/dateQuarter'
 import KanbanBoard from './components/KanbanBoard'
-import ChartsSection from './components/ChartsSection'
 import ReflectionWall from './components/ReflectionWall'
-import AchievementWall from './components/AchievementWall'
-import DataAdmin from './components/DataAdmin'
 import avatarPng from './assets/avatar.png'
 import notsignedPng from './assets/notsigned.png'
+
+// 重页面懒加载：echarts（数据图表）、勋章图（成就）、xlsx（数据管理）等大依赖按需下载
+const ChartsSection = lazy(() => import('./components/ChartsSection'))
+const AchievementWall = lazy(() => import('./components/AchievementWall'))
+const DataAdmin = lazy(() => import('./components/DataAdmin'))
 import type { EventItem } from './types'
 import type { BusinessId } from './lib/business'
 
@@ -191,27 +193,31 @@ function AppContent() {
           <main className="app-main">
             {!board.ready ? (
               <PageSkeleton />
-            ) : view === 'board' ? (
-              <KanbanBoard
-                events={filteredEvents}
-                metas={board.metas}
-                columnOrder={board.columnOrder}
-                setCategory={board.setCategory}
-                setDifficulty={board.setDifficulty}
-                setReflection={board.setReflection}
-                setBusiness={board.setBusiness}
-                setAward={board.setAward}
-                saveColumnOrder={board.saveColumnOrder}
-                editable={authed}
-              />
-            ) : view === 'reflection' ? (
-              <ReflectionWall events={filteredEvents} metas={board.metas} />
-            ) : view === 'achievements' ? (
-              <AchievementWall events={dash.events} metas={board.metas} />
-            ) : view === 'admin' && authed ? (
-              <DataAdmin />
             ) : (
-              <ChartsSection stats={stats} extra={extra} />
+              <Suspense fallback={<PageSkeleton />}>
+                {view === 'board' ? (
+                  <KanbanBoard
+                    events={filteredEvents}
+                    metas={board.metas}
+                    columnOrder={board.columnOrder}
+                    setCategory={board.setCategory}
+                    setDifficulty={board.setDifficulty}
+                    setReflection={board.setReflection}
+                    setBusiness={board.setBusiness}
+                    setAward={board.setAward}
+                    saveColumnOrder={board.saveColumnOrder}
+                    editable={authed}
+                  />
+                ) : view === 'reflection' ? (
+                  <ReflectionWall events={filteredEvents} metas={board.metas} />
+                ) : view === 'achievements' ? (
+                  <AchievementWall events={dash.events} metas={board.metas} />
+                ) : view === 'admin' && authed ? (
+                  <DataAdmin />
+                ) : (
+                  <ChartsSection stats={stats} extra={extra} />
+                )}
+              </Suspense>
             )}
           </main>
 
