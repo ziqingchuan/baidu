@@ -1,10 +1,30 @@
 /**
  * 统一 ECharts 柔和主题：低对比、高透明度、圆润。
  * 各图表 option 通过合并本对象获得一致质感。
+ * echarts 按需引入：只注册项目用到的图表/组件/渲染器，避免全量打包。
  */
-import type { EChartsOption } from 'echarts'
+import * as echarts from 'echarts/core'
+import {
+  BarChart, LineChart, PieChart, RadarChart, HeatmapChart, ScatterChart, TreemapChart,
+} from 'echarts/charts'
+import {
+  TitleComponent, TooltipComponent, GridComponent, LegendComponent,
+  PolarComponent, RadarComponent, CalendarComponent, VisualMapComponent,
+} from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
 
-export const chartBase: EChartsOption = {
+// 按需注册（新增图表类型时在此补充对应 Chart / Component，否则不渲染）
+echarts.use([
+  BarChart, LineChart, PieChart, RadarChart, HeatmapChart, ScatterChart, TreemapChart,
+  TitleComponent, TooltipComponent, GridComponent, LegendComponent,
+  PolarComponent, RadarComponent, CalendarComponent, VisualMapComponent,
+  CanvasRenderer,
+])
+
+/** 模块化 echarts 实例，供 echarts-for-react core 使用 */
+export { echarts }
+
+export const chartBase = {
   textStyle: { color: '#7c818c', fontSize: 12 },
   // 柔和 tooltip
   tooltip: {

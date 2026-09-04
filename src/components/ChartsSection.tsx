@@ -1,10 +1,10 @@
-import ReactECharts from 'echarts-for-react'
+import ReactEChartsCore from 'echarts-for-react/lib/core'
 import { Card, Col, Row } from 'antd'
 import type { BoardStats } from '../lib/boardStats'
 import type { ExtraStats } from '../lib/extraStats'
 import { CATEGORIES, UNASSIGNED_CATEGORY } from '../lib/categories'
 import { BUSINESSES } from '../lib/business'
-import { chartBase, barRadius, softFill } from '../lib/chartTheme'
+import { chartBase, barRadius, softFill, echarts } from '../lib/chartTheme'
 
 /** 分类分布环形图（任务数，任务导向） */
 function CategoryDonut({ stats }: { stats: BoardStats }) {
@@ -30,7 +30,7 @@ function CategoryDonut({ stats }: { stats: BoardStats }) {
   }
   return (
     <Card size="small" title="任务分类分布" className="charts-card">
-      <ReactECharts option={option} style={{ height: 280 }} notMerge />
+      <ReactEChartsCore echarts={echarts} option={option} style={{ height: 280 }} notMerge />
     </Card>
   )
 }
@@ -73,7 +73,7 @@ function MonthlyEvents({ stats }: { stats: BoardStats }) {
   }
   return (
     <Card size="small" title="月度任务占比" className="charts-card">
-      <ReactECharts option={option} style={{ height: 280 }} notMerge />
+      <ReactEChartsCore echarts={echarts} option={option} style={{ height: 280 }} notMerge />
     </Card>
   )
 }
@@ -155,7 +155,7 @@ function DifficultyBars({ stats }: { stats: BoardStats }) {
   }
   return (
     <Card size="small" title="任务平均难度" className="charts-card">
-      <ReactECharts option={option} style={{ height: 280 }} notMerge />
+      <ReactEChartsCore echarts={echarts} option={option} style={{ height: 280 }} notMerge />
     </Card>
   )
 }
@@ -221,7 +221,7 @@ function CodeVolume({ stats }: { stats: BoardStats }) {
   }
   return (
     <Card size="small" title="月度代码量" className="charts-card">
-      <ReactECharts option={option} style={{ height: 280 }} notMerge />
+      <ReactEChartsCore echarts={echarts} option={option} style={{ height: 280 }} notMerge />
     </Card>
   )
 }
@@ -279,7 +279,7 @@ function YearCalendar({ extra }: { extra: ExtraStats }) {
     <Card size="small" title="产出日历" className="charts-card">
       {/* key 随筛选范围变化 → 切换季度时重挂载 + CSS 淡入（ECharts 日历热力图原生更新动画不可靠） */}
       <div key={JSON.stringify(range)} className="calendar-fade">
-        <ReactECharts option={option} style={{ height: 220 }} />
+        <ReactEChartsCore echarts={echarts} option={option} style={{ height: 220 }} />
       </div>
     </Card>
   )
@@ -316,7 +316,7 @@ function HourClock({ extra }: { extra: ExtraStats }) {
   }
   return (
     <Card size="small" title="24 小时工作节律" className="charts-card">
-      <ReactECharts option={option} style={{ height: 240 }} notMerge />
+      <ReactEChartsCore echarts={echarts} option={option} style={{ height: 240 }} notMerge />
     </Card>
   )
 }
@@ -347,7 +347,7 @@ function WeekdayRadar({ extra }: { extra: ExtraStats }) {
   }
   return (
     <Card size="small" title="一周产出节奏" className="charts-card">
-      <ReactECharts option={option} style={{ height: 240 }} notMerge />
+      <ReactEChartsCore echarts={echarts} option={option} style={{ height: 240 }} notMerge />
     </Card>
   )
 }
@@ -400,7 +400,7 @@ function KeywordBubble({ extra }: { extra: ExtraStats }) {
   }
   return (
     <Card size="small" title="我的关键词" className="charts-card">
-      <ReactECharts option={option} style={{ height: 240 }} notMerge />
+      <ReactEChartsCore echarts={echarts} option={option} style={{ height: 240 }} notMerge />
     </Card>
   )
 }
@@ -449,7 +449,7 @@ function BizCategoryHeatmap({ extra }: { extra: ExtraStats }) {
   }
   return (
     <Card size="small" title="各业务的工作类型分布" className="charts-card">
-      <ReactECharts option={option} style={{ height: 260 }} notMerge />
+      <ReactEChartsCore echarts={echarts} option={option} style={{ height: 260 }} notMerge />
     </Card>
   )
 }
@@ -514,7 +514,7 @@ function BizRepoTreemap({ extra }: { extra: ExtraStats }) {
   }
   return (
     <Card size="small" title="产出集中在哪些代码库" className="charts-card">
-      <ReactECharts option={option} style={{ height: 260 }} notMerge />
+      <ReactEChartsCore echarts={echarts} option={option} style={{ height: 260 }} notMerge />
     </Card>
   )
 }
