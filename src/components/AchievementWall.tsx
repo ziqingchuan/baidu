@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Card, Tooltip } from 'antd'
 import type { EventItem, EventMeta } from '../types'
 import { achievementStatusesByGroup, preloadMedalImages } from '../lib/achievements'
+import { AchievementSkeleton } from './Skeletons'
 
 interface Props {
   events: EventItem[]
@@ -50,11 +51,41 @@ function AchievementBadge({ a }: { a: { id: string; name: string; desc: string; 
  */
 export default function AchievementWall({ events, metas }: Props) {
   const groups = useMemo(() => achievementStatusesByGroup(events, metas), [events, metas])
+  // 全部勋章图加载完成前先显示骨架屏，避免"页面渲染出来、图片还没加载完"
+  const [imagesReady, setImagesReady] = useState(false)
 
   // 挂载时预加载勋章图（模块级去重，同会话只跑一次）
   useEffect(() => {
     preloadMedalImages()
   }, [])
+
+  // 等所有勋章图加载完成再渲染（失败也算完成，避免骨架卡死）
+  useEffect(() => {
+    let cancelled = false
+    const urls = groups.flatMap((g) => g.items.map((s) => s.icon)).filter(Boolean)
+    if (!urls.length) {
+      setImagesReady(true)
+      return
+    }
+    Promise.all(
+      urls.map(
+        (url) =>
+          new Promise<void>((resolve) => {
+            const img = new Image()
+            img.onload = () => resolve()
+            img.onerror = () => resolve()
+            img.src = url
+          }),
+      ),
+    ).then(() => {
+      if (!cancelled) setImagesReady(true)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [groups])
+
+  if (!imagesReady) return <AchievementSkeleton />
 
   return (
     <Card

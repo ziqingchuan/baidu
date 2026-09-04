@@ -10,6 +10,7 @@ import { dateQuarter } from './lib/dateQuarter'
 import KanbanBoard from './components/KanbanBoard'
 import ChartsSection from './components/ChartsSection'
 import ReflectionWall from './components/ReflectionWall'
+import { PageSkeleton } from './components/Skeletons'
 import avatarPng from './assets/avatar.webp'
 import notsignedPng from './assets/notsigned.webp'
 
@@ -24,22 +25,6 @@ type View = 'board' | 'charts' | 'reflection' | 'achievements' | 'admin'
 /** 从任务列表推导可选季度（倒序） */
 function listQuarters(events: EventItem[]): string[] {
   return [...new Set(events.map((e) => dateQuarter(e.date)).filter(Boolean))].sort().reverse()
-}
-
-/** 数据加载骨架屏：云端数据就绪前展示 */
-function PageSkeleton() {
-  return (
-    <div className="page-skeleton" aria-label="数据加载中">
-      <div className="sk sk-hero" />
-      <div className="sk-row">
-        <div className="sk sk-card" />
-        <div className="sk sk-card" />
-        <div className="sk sk-card" />
-      </div>
-      <div className="sk sk-list" />
-      <div className="sk sk-list" />
-    </div>
-  )
 }
 
 export default function App() {
@@ -192,9 +177,9 @@ function AppContent() {
 
           <main className="app-main">
             {!board.ready ? (
-              <PageSkeleton />
+              <PageSkeleton view={view} />
             ) : (
-              <Suspense fallback={<PageSkeleton />}>
+              <Suspense fallback={<PageSkeleton view={view} />}>
                 {view === 'board' ? (
                   <KanbanBoard
                     events={filteredEvents}

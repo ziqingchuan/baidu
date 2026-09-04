@@ -4,17 +4,17 @@ import { defineConfig } from 'vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  // 部署在 /baidu/ 子路径下，资源统一加前缀（如改部署到域名根目录，再改成 '/'）
   base: '/baidu/',
   build: {
-    // 大依赖拆独立 chunk：echarts/antd/xlsx 只在对应懒加载页面用到时按需下载
+    // echarts 是首页必需（静态引入 + preload）；xlsx 仅数据管理页（懒加载）。
+    // antd 不强制整库打包，交给 tree-shaking 只带实际用到的部分，减小首屏体积。
     rolldownOptions: {
       output: {
         manualChunks(id: string) {
           // xlsx 仅数据管理页用（随懒加载下载）
           if (id.includes('node_modules/xlsx')) return 'xlsx'
-          if (id.includes('@ant-design/icons')) return 'antd-icons'
           if (id.includes('node_modules/echarts') || id.includes('node_modules/zrender') || id.includes('node_modules/echarts-for-react')) return 'echarts'
-          if (id.includes('node_modules/antd') || id.includes('node_modules/@ant-design')) return 'antd'
           if (id.includes('node_modules/react') || id.includes('node_modules/scheduler')) return 'react'
           return undefined
         },

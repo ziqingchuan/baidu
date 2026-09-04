@@ -1064,34 +1064,59 @@ body {
   white-space: nowrap;
 }
 
-/* ========== 页面加载骨架屏（云端数据就绪前） ========== */
-.page-skeleton {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 16px;
-}
+/* ========== 分 tab 精细骨架屏（数据/图片就绪前） ========== */
 .sk {
   border-radius: 10px;
   background: linear-gradient(90deg, #f0f2f5 25%, #e6e9ee 37%, #f0f2f5 63%);
   background-size: 400% 100%;
   animation: sk-shimmer 1.4s ease infinite;
 }
-.sk-hero {
-  height: 120px;
-}
-.sk-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-.sk-card {
-  height: 160px;
-}
-.sk-list {
-  height: 64px;
-}
 @keyframes sk-shimmer {
   0%   { background-position: 100% 0; }
   100% { background-position: 0 0; }
 }
+.sk-page { display: flex; flex-direction: column; gap: 16px; padding: 16px; }
+.sk-row { display: grid; gap: 16px; }
+.sk-row-23 { grid-template-columns: 2fr 1fr; }
+.sk-row-12 { grid-template-columns: 1fr 1fr; }
+.sk-row-13 { grid-template-columns: repeat(3, 1fr); }
+
+/* 图表页 */
+.sk-chart-card { background: #fff; border-radius: 12px; padding: 14px; height: 240px; box-shadow: 0 1px 3px rgba(20,40,80,.05); }
+.sk-chart-card.sk-lg { height: 320px; }
+.sk-cal { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; height: 100%; align-content: start; }
+.sk-cal .sk.cell { aspect-ratio: 1; border-radius: 4px; }
+.sk-bubbles { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: center; height: 100%; }
+.sk-bubbles .sk.bubble { border-radius: 50%; }
+.sk-bars { display: flex; align-items: flex-end; gap: 10px; height: 100%; }
+.sk-bars .sk.bar { flex: 1; border-radius: 6px 6px 0 0; }
+.sk-chart-card .sk.heat { width: 100%; height: 100%; }
+.sk-chart-card .sk.ring { width: 110px; height: 110px; border-radius: 50%; margin: 26px auto 0; }
+
+/* 产出看板页 */
+.sk-board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; padding: 16px; }
+.sk-col { background: #fff; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px; min-height: 420px; box-shadow: 0 1px 3px rgba(20,40,80,.05); }
+.sk-col .sk.col-head { height: 26px; width: 70%; margin-bottom: 4px; }
+.sk-col .sk.card-bar { height: 44px; }
+
+/* 反思页 */
+.sk-reflect-group { display: flex; flex-direction: column; gap: 12px; }
+.sk.group-head { height: 24px; width: 40%; }
+.sk-reflect-card { background: #fff; border-radius: 12px; padding: 14px; height: 160px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 1px 3px rgba(20,40,80,.05); }
+.sk.line { height: 12px; }
+.sk.line.w-30 { width: 30%; }
+.sk.line.w-40 { width: 40%; }
+.sk.line.w-50 { width: 50%; }
+.sk.line.w-70 { width: 70%; }
+.sk.line.w-90 { width: 90%; }
+
+/* 成就页 */
+.sk-ach-group { display: flex; flex-direction: column; gap: 12px; }
+.sk-ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 16px; }
+.sk.medal { aspect-ratio: 1; width: 64px; justify-self: center; border-radius: 50%; }
+
+/* 数据管理页 */
+.sk.admin-toolbar { height: 40px; margin-bottom: 4px; }
+.sk-table { background: #fff; border-radius: 12px; padding: 4px 14px; box-shadow: 0 1px 3px rgba(20,40,80,.05); }
+.sk-table-row { display: grid; grid-template-columns: 1fr 2fr 1.5fr 1fr; gap: 14px; align-items: center; height: 46px; border-bottom: 1px solid #f2f4f8; }
+.sk-table-row:last-child { border-bottom: none; }
