@@ -10,8 +10,11 @@
     "preview": "vite preview",
     "export-data": "node scripts/export-data.ts",
     "to-webp": "node scripts/to-webp.mjs",
+    "check-images": "node scripts/check-images.mjs",
     "deploy": "bash scripts/deploy.sh",
-    "gh-deploy": "pnpm build && gh-pages -d dist"
+    "predeploy": "pnpm check-images",
+    "gh-deploy": "pnpm build && gh-pages -d dist",
+    "pregh-deploy": "pnpm check-images"
   },
   "dependencies": {
     "@ant-design/icons": "^6.3.2",
