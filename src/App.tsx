@@ -12,6 +12,8 @@ import ChartsSection from './components/ChartsSection'
 import ReflectionWall from './components/ReflectionWall'
 import AchievementWall from './components/AchievementWall'
 import DataAdmin from './components/DataAdmin'
+import avatarPng from './assets/avatar.png'
+import notsignedPng from './assets/notsigned.png'
 import type { EventItem } from './types'
 import type { BusinessId } from './lib/business'
 
@@ -173,13 +175,13 @@ function AppContent() {
               {authed ? (
                 <Popconfirm title="确定退出登录？" onConfirm={handleLogout} okText="退出" cancelText="取消">
                   <button type="button" className="auth-avatar" title="退出登录">
-                    <img src="/avatar.png" alt="已登录" />
+                    <img src={avatarPng} alt="已登录" />
                   </button>
                 </Popconfirm>
               ) : (
                 <Tooltip title="点击登录">
                   <button type="button" className="auth-avatar" onClick={() => setLoginOpen(true)}>
-                    <img src="/notsigned.png" alt="未登录" />
+                    <img src={notsignedPng} alt="未登录" />
                   </button>
                 </Tooltip>
               )}
