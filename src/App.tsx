@@ -8,12 +8,12 @@ import { buildExtraStats } from './lib/extraStats'
 import { isAuthed, setAuthed, checkPassword } from './lib/mockAuth'
 import { dateQuarter } from './lib/dateQuarter'
 import KanbanBoard from './components/KanbanBoard'
+import ChartsSection from './components/ChartsSection'
 import ReflectionWall from './components/ReflectionWall'
 import avatarPng from './assets/avatar.webp'
 import notsignedPng from './assets/notsigned.webp'
 
-// 重页面懒加载：echarts（数据图表）、勋章图（成就）、xlsx（数据管理）等大依赖按需下载
-const ChartsSection = lazy(() => import('./components/ChartsSection'))
+// 数据图表是默认首页，echarts 必须首屏预加载（不懒加载）；成就勋章/数据管理保持按需下载
 const AchievementWall = lazy(() => import('./components/AchievementWall'))
 const DataAdmin = lazy(() => import('./components/DataAdmin'))
 import type { EventItem } from './types'
