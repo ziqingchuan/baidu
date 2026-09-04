@@ -845,73 +845,225 @@ body {
   gap: 10px;
 }
 
-/* 导入文件选择 */
-.admin-import-file {
-  display: block;
-  padding: 14px;
-  border: 1px dashed #c9d4e8;
-  border-radius: 8px;
-  cursor: pointer;
-  text-align: center;
-  transition: border-color 0.2s;
-}
-.admin-import-file:hover {
-  border-color: #7aa7f0;
-}
-.admin-import-file input {
-  display: none;
-}
-.admin-import-name {
-  font-size: 13px;
-  color: #3a4150;
-}
-.admin-import-placeholder {
-  font-size: 13px;
-  color: #a9b0bf;
-}
-
-/* ========== 看板视图切换（任务类型 / 业务线） ========== */
+/* ========== 看板视图切换 + 亮点墙 ========== */
 .kanban-view-switch {
   margin-bottom: 12px;
 }
-/* 业务线视图 */
-.kanban-biz {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+.kanban-highlights {
+  max-width: 1000px;
+  margin: 0 auto;
 }
-.kanban-biz-group {
-  border: 1px solid #edf0f6;
-  border-radius: 12px;
-  padding: 10px 12px 12px;
-  background: #fff;
-}
-.kanban-biz-header {
+.kanban-highlights-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 16px;
+}
+.kanban-highlights-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #3a4150;
+}
+.kanban-highlights-copy {
+  border: 1px solid #d8dee9;
+  border-radius: 8px;
+  background: #fff;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: #4a4f58;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s;
+}
+.kanban-highlights-copy:hover {
+  border-color: #7aa7f0;
+  color: #7aa7f0;
+}
+.kanban-highlights-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.kanban-highlight-group {
+  border: 1px solid #edf0f6;
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: #fff;
+}
+.kanban-highlight-group-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 10px;
   padding-bottom: 8px;
   border-bottom: 1px solid #f1f3f8;
 }
-.kanban-biz-name {
-  font-size: 13px;
+.kanban-highlight-group-name {
+  font-size: 14px;
   font-weight: 600;
-  display: inline-flex;
+  color: #3a4150;
+}
+.kanban-highlight-list {
+  display: flex;
+  flex-direction: column;
+}
+.kanban-highlight-item {
+  display: flex;
   align-items: center;
-  gap: 6px;
-}
-.kanban-biz-body {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 10px;
+  padding: 7px 4px;
+  border-bottom: 1px solid #f5f7fa;
+  font-size: 13px;
 }
-.kanban-biz-card {
-  width: 100%;
+.kanban-highlight-item:last-child {
+  border-bottom: none;
+}
+.kanban-highlight-date {
+  flex-shrink: 0;
+  color: #a9b0bf;
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.kanban-highlight-title {
+  flex: 1;
+  text-align: left;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #3a4150;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 0;
+}
+.kanban-highlight-title:hover {
+  color: #7aa7f0;
+}
+.kanban-highlight-meta {
+  flex-shrink: 0;
+  color: #8a93a5;
+  font-size: 12px;
 }
 .kanban-empty-tip {
   padding: 40px 0;
   text-align: center;
   color: #a9b0bf;
   font-size: 13px;
+}
+
+/* ========== 成就勋章墙 ========== */
+.ach-wall {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  gap: 20px 16px;
+  justify-items: center;
+}
+.ach-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: default;
+  padding: 10px 6px;
+  border-radius: 10px;
+}
+.ach-medal {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 8px;
+}
+.ach-medal-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.ach-medal-img.loaded {
+  opacity: 1;
+}
+/* hover 扫光：一条斜向高光带，从左上角扫到右下角（未解锁勋章不触发） */
+.ach-item:not(.ach-locked):hover .ach-medal::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 45%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-30deg);
+  animation: ach-sweep 0.7s ease;
+  pointer-events: none;
+}
+@keyframes ach-sweep {
+  0%   { left: -75%; }
+  100% { left: 125%; }
+}
+/* 预留勋章位：AI 生成图片前显示圆环占位 */
+.ach-medal-placeholder {
+  width: 38px;
+  height: 38px;
+  border: 2px dashed #d9b877;
+  border-radius: 50%;
+  opacity: 0.55;
+}
+/* 未解锁：置灰 */
+.ach-item.ach-locked .ach-medal-img {
+  filter: grayscale(1);
+  opacity: 0.4;
+}
+.ach-item.ach-locked .ach-medal-placeholder {
+  opacity: 0.25;
+}
+.ach-item.ach-locked .ach-name {
+  color: #b8bcc4;
+}
+.ach-name {
+  font-size: 12px;
+  color: #4a4f58;
+  white-space: nowrap;
+}
+
+/* ========== 页面加载骨架屏（云端数据就绪前） ========== */
+.page-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+.sk {
+  border-radius: 10px;
+  background: linear-gradient(90deg, #f0f2f5 25%, #e6e9ee 37%, #f0f2f5 63%);
+  background-size: 400% 100%;
+  animation: sk-shimmer 1.4s ease infinite;
+}
+.sk-hero {
+  height: 120px;
+}
+.sk-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.sk-card {
+  height: 160px;
+}
+.sk-list {
+  height: 64px;
+}
+@keyframes sk-shimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: 0 0; }
 }

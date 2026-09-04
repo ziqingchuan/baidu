@@ -3,7 +3,7 @@ import type { EventItem, EventMeta } from '../types'
 import { CATEGORIES, UNASSIGNED_CATEGORY, softTint } from '../lib/categories'
 import { effectiveCategory } from '../lib/boardStats'
 import { businessById } from '../lib/business'
-import { isPopoReady, loadMetaLikes, toggleMetaLike, type MetaLikeInfo } from '../lib/popoData'
+import { isSupabaseReady, loadMetaLikes, toggleMetaLike, type MetaLikeInfo } from '../lib/supabaseData'
 import { awardById } from '../lib/awards'
 import AwardBadge from './AwardBadge'
 import starSvg from '../assets/star.svg'
@@ -24,28 +24,28 @@ function fmtDate(date: string): string {
 /** 反思墙：把写过反思的任务按分类分组展示，供汇报/自我沉淀查看 */
 export default function ReflectionWall({ events, metas }: Props) {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
-  // 点赞信息：event_key -> {recordId, count, liked}（popo 真实数据 / 本地 mock，均持久化）
+  // 点赞信息：event_key -> {recordId, count, liked}（本地 mock，持久化到 localStorage）
   const [likes, setLikes] = useState<Record<string, MetaLikeInfo>>({})
 
   useEffect(() => {
     let cancelled = false
-    loadMetaLikes()
+    loadMetaLikes(metas)
       .then((info) => {
         if (!cancelled) setLikes(info)
       })
-      .catch((e) => console.warn('[popo] 点赞信息加载失败:', e))
+      .catch((e) => console.warn('[supabase] 点赞信息加载失败:', e))
     return () => {
       cancelled = true
     }
   }, [events, metas])
 
   /** 点赞 / 取消点赞 */
-  const handleLike = async (eventKey: string, recordId: string, liked: boolean) => {
+  const handleLike = async (eventKey: string, currentCount: number, liked: boolean) => {
     try {
-      const next = await toggleMetaLike(recordId, liked)
-      setLikes((prev) => (prev ? { ...prev, [eventKey]: { recordId, ...next } } : prev))
+      const next = await toggleMetaLike(eventKey, currentCount, liked)
+      setLikes((prev) => (prev ? { ...prev, [eventKey]: { recordId: eventKey, ...next } } : prev))
     } catch (e) {
-      console.warn('[popo] 点赞失败:', e)
+      console.warn('[supabase] 点赞失败:', e)
     }
   }
 
@@ -180,9 +180,9 @@ export default function ReflectionWall({ events, metas }: Props) {
                             <button
                               type="button"
                               className={`reflection-like${likes[e.key]?.liked ? ' liked' : ''}`}
-                              // popo 环境下点赞信息未加载（无真实 recordId）时禁用，避免把 mock id 写入云端
-                              disabled={isPopoReady() && !likes[e.key]?.recordId}
-                              onClick={() => handleLike(e.key, likes[e.key]?.recordId ?? `mock-${e.key}`, !!likes[e.key]?.liked)}
+                              // 云端环境下点赞信息未加载时禁用，避免 mock id 写入云端
+                              disabled={isSupabaseReady() && !likes[e.key]?.recordId}
+                              onClick={() => handleLike(e.key, likes[e.key]?.count ?? 0, !!likes[e.key]?.liked)}
                             >
                               <svg className="reflection-heart" viewBox="0 0 1024 1024" aria-hidden="true">
                                 <path

@@ -90,6 +90,8 @@ export interface EventMeta {
   business?: BusinessId
   /** 关键成果奖牌：gold/silver/copper，无则不标记 */
   award?: 'gold' | 'silver' | 'copper'
+  /** 点赞数（云端 event_meta.like_count） */
+  likeCount?: number
   /** 更新时间 */
   updatedAt: string
 }

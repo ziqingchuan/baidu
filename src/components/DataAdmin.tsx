@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Table, Tag, Tooltip, App as AntApp, Empty, Segmented, Input, Modal, Checkbox } from 'antd'
+import { Table, Tag, Tooltip, App as AntApp, Segmented, Input, Modal, Checkbox } from 'antd'
 import type { TableProps } from 'antd'
-import { DownloadOutlined, UploadOutlined } from '@ant-design/icons'
+import { DownloadOutlined } from '@ant-design/icons'
 import * as XLSX from 'xlsx'
-import { isPopoReady, loadAllRawRecords, restoreRawRecord } from '../lib/popoData'
+import { isSupabaseReady, loadAllRawRecords } from '../lib/supabaseData'
 import { categoryById, type CategoryId } from '../lib/categories'
 import { businessById, type BusinessId } from '../lib/business'
 import { useDashboardData } from '../lib/useDashboardData'
 import { JsonViewer } from './common/JsonViewer'
 import Button from './ui/Button'
 
-/** 单条原始记录（popo find 返回结构，业务字段在 data 里） */
+/** 单条原始记录（Supabase 行结构，业务字段展开在 data 里） */
 interface RawRecord {
   id: number | string
   data: Record<string, any>
@@ -20,7 +20,7 @@ interface RawRecord {
   userInteraction?: Record<string, any>
 }
 
-/** 数据源：popo 动态数据表 / 脚本抓取的原始数据表 */
+/** 数据源：Supabase 云端表 / 脚本抓取的原始数据表 */
 type TableName =
   | 'event_meta'
   | 'column_order'
@@ -96,7 +96,7 @@ const CARD_TYPE_COLORS: Record<string, string> = {
   技术专项: 'cyan',
 }
 
-// ---------- 本地 mock 数据（无 PopSDK 时用于调试 UI/交互） ----------
+// ---------- 本地 mock 数据（未配置 Supabase 时用于调试 UI/交互） ----------
 const MOCK_CATEGORIES: CategoryId[] = ['feature', 'ux', 'efficiency', 'bugfix', 'engineering']
 const MOCK_BUSINESSES: BusinessId[] = ['bunnydo', 'dodo', 'comate', 'ai-internal', 'other']
 const MOCK_AWARDS = ['', '', '', '', '', 'gold', 'silver', 'copper']
@@ -135,6 +135,7 @@ function mockRecord(i: number): RawRecord {
       business: biz,
       category: cat,
       difficulty: diff,
+      like_count: (i % 9) + 1,
       event_key: mockEventKey(i),
       reflection: hasReflection ? `1. 启发：这是第 ${i + 1} 条任务的反思内容，用于测试较长文本在表格里的展示与截断行为。\n2. 经验：mock 数据方便本地调试。` : '',
       state: 'active',
@@ -172,15 +173,15 @@ function recordSearchText(r: RawRecord): string {
   }
 }
 
-/** 数据源类型：popo 动态数据表（需 PopSDK）还是本地脚本原始数据（无需） */
+/** 数据源类型：Supabase 云端表还是本地脚本原始数据 */
 const POPO_TABLES: TableName[] = ['event_meta', 'column_order']
 
 /**
- * 数据管理后台：把 popo 动态数据表 + 脚本抓取的原始数据表（reviews/commits/cards）可视化，
- * 便于核对云端与本地快照实际存了什么。仅登录后入口可见。本地 dev 无 PopSDK 时动态数据表展示 mock。
+ * 数据管理后台：把 Supabase 云端表 + 脚本抓取的原始数据表（reviews/commits/cards）可视化，
+ * 便于核对云端与本地快照实际存了什么。仅登录后入口可见。未配置 Supabase 时云端表展示 mock。
  */
 export default function DataAdmin() {
-  const { message, modal } = AntApp.useApp()
+  const { message } = AntApp.useApp()
   const dash = useDashboardData()
   const [table, setTable] = useState<TableName>('event_meta')
   const [records, setRecords] = useState<RawRecord[]>([])
@@ -206,13 +207,13 @@ export default function DataAdmin() {
 
   const load = useCallback(async () => {
     const seq = ++loadSeqRef.current
-    // 本地脚本原始数据：直接来自 dashboard.json，无需 PopSDK
+    // 本地脚本原始数据：直接来自 dashboard.json
     if (table === 'reviews' || table === 'commits' || table === 'cards') {
       setRecords(rawRows[table])
       return
     }
-    if (!isPopoReady()) {
-      // 本地 dev：用 mock 数据调试 UI/交互
+    if (!isSupabaseReady()) {
+      // 未配置 Supabase：用 mock 数据调试 UI/交互
       setRecords(table === 'event_meta' ? MOCK_RECORDS : MOCK_ORDERS)
       return
     }
@@ -222,7 +223,7 @@ export default function DataAdmin() {
       // 仅当仍是最新一次请求时才落地，避免旧请求覆盖新表
       if (seq === loadSeqRef.current) setRecords(rows)
     } catch (e) {
-      console.warn('[popo] 数据管理后台拉取失败:', e)
+      console.warn('[supabase] 数据管理后台拉取失败:', e)
       if (seq === loadSeqRef.current) message.error('拉取数据表失败，请查看控制台')
     } finally {
       if (seq === loadSeqRef.current) setLoading(false)
@@ -259,11 +260,11 @@ export default function DataAdmin() {
     setExportOpen(true)
   }
 
-  /** 拉取某个表当前应导出的完整数据（popo 表走云端，原始表走本地快照） */
+  /** 拉取某个表当前应导出的完整数据（云端表走 Supabase，原始表走本地快照） */
   const fetchTableRows = useCallback(
     async (t: TableName): Promise<RawRecord[]> => {
       if (t === 'reviews' || t === 'commits' || t === 'cards') return rawRows[t]
-      if (!isPopoReady()) return t === 'event_meta' ? MOCK_RECORDS : MOCK_ORDERS
+      if (!isSupabaseReady()) return t === 'event_meta' ? MOCK_RECORDS : MOCK_ORDERS
       return loadAllRawRecords(t)
     },
     [rawRows],
@@ -294,7 +295,7 @@ export default function DataAdmin() {
       message.success(`已导出 ${exportSelected.length} 张表到 Excel`)
       setExportOpen(false)
     } catch (e) {
-      console.warn('[popo] 导出 Excel 失败:', e)
+      console.warn('[supabase] 导出 Excel 失败:', e)
       message.error('导出 Excel 失败，请查看控制台')
     } finally {
       setExporting(false)
@@ -325,97 +326,11 @@ export default function DataAdmin() {
       message.success(`已导出 ${exportSelected.length} 张表到 JSON`)
       setExportOpen(false)
     } catch (e) {
-      console.warn('[popo] 导出 JSON 失败:', e)
+      console.warn('[supabase] 导出 JSON 失败:', e)
       message.error('导出 JSON 失败，请查看控制台')
     } finally {
       setExporting(false)
     }
-  }
-
-  // ---------- 导入（恢复） ----------
-  const [importOpen, setImportOpen] = useState(false)
-  const [importFile, setImportFile] = useState<File | null>(null)
-  const [importing, setImporting] = useState(false)
-
-  const openImport = () => {
-    setImportFile(null)
-    setImportOpen(true)
-  }
-
-  const handleImportFile = (file: File) => {
-    setImportFile(file)
-  }
-
-  /** 解析导入的 JSON，并逐条还原写回 popo（event_meta 按 event_key、column_order 按 category） */
-  const handleImport = async () => {
-    if (!importFile) {
-      message.warning('请先选择要导入的 JSON 文件')
-      return
-    }
-    if (!isPopoReady()) {
-      message.error('当前环境无 PopSDK（本地开发），导入恢复只能在 popo 线上页面执行')
-      return
-    }
-    setImporting(true)
-    try {
-      const text = await importFile.text()
-      const payload = JSON.parse(text) as { tables?: Record<string, any[]> }
-      const tables = payload.tables ?? {}
-      // 只恢复可写回 popo 的两张表
-      const restoreTables = (['event_meta', 'column_order'] as const).filter((t) => Array.isArray(tables[t]))
-      if (!restoreTables.length) {
-        message.warning('文件中没有可恢复的 event_meta / column_order 数据')
-        return
-      }
-      let ok = 0
-      let skipped = 0
-      let fail = 0
-      const failedKeys: string[] = []
-      for (const t of restoreTables) {
-        for (const rec of tables[t]) {
-          try {
-            const result = await restoreRawRecord(t, rec)
-            if (result === 'skipped-newer') skipped++
-            else ok++
-          } catch (e) {
-            fail++
-            const key = rec?.data?.event_key ?? rec?.data?.category ?? rec?.id ?? '?'
-            failedKeys.push(`${t}::${key}`)
-            console.warn(`[popo] 恢复失败 ${t}::${key}:`, e)
-          }
-        }
-      }
-      const skipText = skipped > 0 ? `，跳过 ${skipped} 条云端较新数据` : ''
-      if (fail === 0) {
-        message.success(`导入恢复完成：成功 ${ok} 条${skipText}`)
-      } else {
-        message.warning(`导入完成：成功 ${ok} 条，失败 ${fail} 条${skipText}（详见控制台）`)
-      }
-      setImportOpen(false)
-      setImportFile(null)
-      // 刷新当前表
-      void load()
-    } catch (e) {
-      console.warn('[popo] 导入 JSON 解析失败:', e)
-      message.error('导入失败：JSON 解析错误或格式不符')
-    } finally {
-      setImporting(false)
-    }
-  }
-
-  /** 导入前二次确认（写操作，防误触） */
-  const confirmImport = () => {
-    if (!importFile) {
-      message.warning('请先选择要导入的 JSON 文件')
-      return
-    }
-    modal.confirm({
-      title: '确认导入恢复？',
-      content: `将把 ${importFile.name} 中的 event_meta / column_order 数据写回 popo 数据库。云端较新的记录会被跳过不覆盖。`,
-      okText: '确认导入',
-      cancelText: '取消',
-      onOk: () => handleImport(),
-    })
   }
 
   // ---------- event_meta 列（反思窄、难度纯数字、event_key 无标签） ----------
@@ -499,21 +414,12 @@ export default function DataAdmin() {
       },
     },
     {
-      title: '记录创建',
-      dataIndex: 'createdAt',
-      width: 96,
-      render: (v: unknown, r: RawRecord) => {
-        const t = String(v ?? '') || r.updatedAt
-        return t ? <span className="admin-mono">{new Date(t).toLocaleDateString()}</span> : '-'
-      },
-    },
-    {
       title: '点赞',
       dataIndex: 'interactionData',
       width: 64,
       align: 'center',
       render: (_v: unknown, r: RawRecord) => {
-        const like = r.interactionData?.like_count ?? 0
+        const like = Number(r.data?.like_count) || 0
         return like > 0 ? <span className="admin-like">♥ {like}</span> : <span className="admin-null">0</span>
       },
     },
@@ -669,7 +575,7 @@ export default function DataAdmin() {
             ? commitsColumns
             : cardsColumns
 
-  /** 刷新提示文案（原始数据表用本地快照，popo 表用云端） */
+  /** 刷新提示文案（原始数据表用本地快照，云端表用 Supabase） */
   const isPopoTable = POPO_TABLES.includes(table)
 
   return (
@@ -686,7 +592,6 @@ export default function DataAdmin() {
             onChange={(e) => setKeyword(e.target.value)}
             style={{ width: 260 }}
           />
-          <Button onClick={openImport} icon={<UploadOutlined />}>导入</Button>
           <Button onClick={openExport} icon={<DownloadOutlined />}>导出</Button>
           <Button onClick={() => void load()} loading={loading}>刷新数据</Button>
         </div>
@@ -705,43 +610,39 @@ export default function DataAdmin() {
         style={{ marginBottom: 12 }}
       />
 
-      {!isPopoReady() && isPopoTable && (
-        <div className="admin-mock-tip">当前为本地开发环境，popo 动态数据表展示 mock 数据用于调试 UI/交互。</div>
+      {!isSupabaseReady() && isPopoTable && (
+        <div className="admin-mock-tip">未配置 Supabase，云端表展示 mock 数据用于调试 UI/交互。</div>
       )}
 
-      {filtered.length === 0 ? (
-        <Empty description={keyword ? '没有匹配的搜索结果' : '暂无记录'} style={{ marginTop: 48 }} />
-      ) : (
-        <Table<RawRecord>
-          rowKey="id"
-          size="small"
-          loading={loading}
-          dataSource={filtered}
-          columns={columns}
-          pagination={{
-            current,
-            pageSize,
-            total: filtered.length,
-            onChange: (p, ps) => {
-              setCurrent(p)
-              setPageSize(ps)
-            },
-            showSizeChanger: true,
-            pageSizeOptions: [10, 20, 50, 100],
-            showQuickJumper: false,
-            showTotal: (t) => `共 ${t} 条`,
-            style: { justifyContent: 'center', margin: '8px 0 0' },
-          }}
-          expandable={{
-            expandedRowRender: expandedRow,
-            expandRowByClick: true,
-            showExpandColumn: false,
-            rowExpandable: () => true,
-          }}
-          scroll={{ x: 'max-content', y: 'calc(100vh - 300px)' }}
-          locale={{ emptyText: '暂无记录' }}
-        />
-      )}
+      <Table<RawRecord>
+        rowKey="id"
+        size="small"
+        loading={loading}
+        dataSource={filtered}
+        columns={columns}
+        pagination={{
+          current,
+          pageSize,
+          total: filtered.length,
+          onChange: (p, ps) => {
+            setCurrent(p)
+            setPageSize(ps)
+          },
+          showSizeChanger: true,
+          pageSizeOptions: [10, 20, 50, 100],
+          showQuickJumper: false,
+          showTotal: (t) => `共 ${t} 条`,
+          style: { justifyContent: 'center', margin: '8px 0 0' },
+        }}
+        expandable={{
+          expandedRowRender: expandedRow,
+          expandRowByClick: true,
+          showExpandColumn: false,
+          rowExpandable: () => true,
+        }}
+        scroll={{ x: 'max-content', y: 'calc(100vh - 300px)' }}
+        locale={{ emptyText: keyword ? '没有匹配的搜索结果' : '暂无记录' }}
+      />
 
       {/* 导出选择弹窗 */}
       <Modal
@@ -779,38 +680,6 @@ export default function DataAdmin() {
             </Checkbox>
           ))}
         </div>
-      </Modal>
-
-      {/* 导入（恢复）弹窗 */}
-      <Modal
-        title="导入数据（恢复）"
-        open={importOpen}
-        onCancel={() => setImportOpen(false)}
-        width={480}
-        footer={
-          <div className="admin-export-footer">
-            <Button onClick={() => setImportOpen(false)}>取消</Button>
-            <Button type="primary" onClick={confirmImport} loading={importing}>开始导入恢复</Button>
-          </div>
-        }
-      >
-        <div className="admin-export-desc">
-          选择之前导出的 JSON 文件，将 event_meta / column_order 数据还原写回 popo 数据库。
-          仅支持 popo 线上环境执行（本地开发无 PopSDK）。
-        </div>
-        <label className="admin-import-file">
-          <input
-            type="file"
-            accept=".json,application/json"
-            onChange={(e) => {
-              const f = e.target.files?.[0]
-              if (f) handleImportFile(f)
-            }}
-          />
-          <span className={importFile ? 'admin-import-name' : 'admin-import-placeholder'}>
-            {importFile ? `已选择：${importFile.name}` : '点击选择 JSON 文件…'}
-          </span>
-        </label>
       </Modal>
     </div>
   )

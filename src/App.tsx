@@ -1,32 +1,40 @@
 import { useMemo, useState } from 'react'
 import { ConfigProvider, App as AntApp, Segmented, Tooltip, Select, theme, Modal, Input, Popconfirm } from 'antd'
-import { CloudUploadOutlined } from '@ant-design/icons'
 import zhCN from 'antd/locale/zh_CN'
 import { useDashboardData } from './lib/useDashboardData'
 import { useBoardState } from './hooks/useBoardState'
 import { buildBoardStats } from './lib/boardStats'
 import { buildExtraStats } from './lib/extraStats'
 import { isAuthed, setAuthed, checkPassword } from './lib/mockAuth'
+import { dateQuarter } from './lib/dateQuarter'
 import KanbanBoard from './components/KanbanBoard'
 import ChartsSection from './components/ChartsSection'
 import ReflectionWall from './components/ReflectionWall'
 import DataAdmin from './components/DataAdmin'
-import Button from './components/ui/Button'
 import type { EventItem } from './types'
 import type { BusinessId } from './lib/business'
 
 type View = 'board' | 'charts' | 'reflection' | 'admin'
 
-/** 由日期推导季度，如 2026-05 -> "2026-Q2" */
-function dateQuarter(date: string): string {
-  const m = Number(date.slice(5, 7))
-  const y = date.slice(0, 4)
-  return `${y}-Q${Math.floor((m - 1) / 3) + 1}`
-}
-
 /** 从任务列表推导可选季度（倒序） */
 function listQuarters(events: EventItem[]): string[] {
-  return [...new Set(events.map((e) => dateQuarter(e.date)))].sort().reverse()
+  return [...new Set(events.map((e) => dateQuarter(e.date)).filter(Boolean))].sort().reverse()
+}
+
+/** 数据加载骨架屏：云端数据就绪前展示 */
+function PageSkeleton() {
+  return (
+    <div className="page-skeleton" aria-label="数据加载中">
+      <div className="sk sk-hero" />
+      <div className="sk-row">
+        <div className="sk sk-card" />
+        <div className="sk sk-card" />
+        <div className="sk sk-card" />
+      </div>
+      <div className="sk sk-list" />
+      <div className="sk sk-list" />
+    </div>
+  )
 }
 
 export default function App() {
@@ -72,9 +80,6 @@ function AppContent() {
     setQuarterState(q)
     localStorage.setItem('output-dashboard:quarter', q)
   }
-  const [syncing, setSyncing] = useState(false)
-  // 同步到云端的逻辑保留，按钮暂不显示（置为 true 即恢复显示）
-  const showSyncButton = false
   // mock 登录态：未登录只读，登录后可拖拽/分类/打分/沉淀
   const [authed, setAuthedState] = useState<boolean>(isAuthed)
   const [loginOpen, setLoginOpen] = useState(false)
@@ -100,18 +105,6 @@ function AppContent() {
     setAuthed(false)
     setAuthedState(false)
     message.info('已退出登录')
-  }
-
-  /** 手动把本地数据同步到 popo 云端 */
-  const handleSyncToCloud = async () => {
-    setSyncing(true)
-    try {
-      const ok = await board.syncLocalToCloud()
-      if (ok) message.success('已同步本地数据到云端')
-      else message.error('同步失败，请检查控制台')
-    } finally {
-      setSyncing(false)
-    }
   }
 
   /** 按季度过滤任务（all 为全部） */
@@ -175,13 +168,6 @@ function AppContent() {
                   ...(authed ? [{ value: 'admin' as View, label: '数据管理' }] : []),
                 ]}
               />
-              {showSyncButton && (
-                <Tooltip title="把本地 localStorage 数据上传到 popo 云端">
-                  <Button icon={<CloudUploadOutlined />} onClick={handleSyncToCloud} loading={syncing}>
-                    同步到云端
-                  </Button>
-                </Tooltip>
-              )}
               {authed ? (
                 <Popconfirm title="确定退出登录？" onConfirm={handleLogout} okText="退出" cancelText="取消">
                   <button type="button" className="auth-avatar" title="退出登录">
@@ -199,7 +185,9 @@ function AppContent() {
           </header>
 
           <main className="app-main">
-            {view === 'board' ? (
+            {!board.ready ? (
+              <PageSkeleton />
+            ) : view === 'board' ? (
               <KanbanBoard
                 events={filteredEvents}
                 metas={board.metas}
@@ -217,7 +205,8 @@ function AppContent() {
             ) : view === 'admin' && authed ? (
               <DataAdmin />
             ) : (
-              <ChartsSection stats={stats} extra={extra} />
+              // 成就勋章用全量数据（历史累积），不随季度筛选
+              <ChartsSection stats={stats} extra={extra} events={dash.events} metas={board.metas} />
             )}
           </main>
 

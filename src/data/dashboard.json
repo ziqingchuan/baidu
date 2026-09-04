@@ -1,6 +1,28 @@
 {
-  "fetchedAt": "2026-09-03T03:53:38.760Z",
+  "fetchedAt": "2026-09-03T13:06:10.079Z",
   "reviews": [
+    {
+      "number": 122380743,
+      "project": "baidu/personal-code/self-kanban",
+      "branch": "master",
+      "subject": "feat: 新增数据管理视图与反思沉淀板块",
+      "status": "MERGED",
+      "insertions": 0,
+      "deletions": 0,
+      "updated": "2026-09-03 14:12:35",
+      "revision": "cc5943b7399e89d5c12f73d79eea54aafd91cab4"
+    },
+    {
+      "number": 122362147,
+      "project": "baidu/personal-code/self-kanban",
+      "branch": "master",
+      "subject": "feat: 项目标题改为「度厂观测站」并微调图表",
+      "status": "MERGED",
+      "insertions": 0,
+      "deletions": 0,
+      "updated": "2026-09-03 14:11:25",
+      "revision": "47bcfc4b1a085155fa0d32f0f28a1500e97377ff"
+    },
     {
       "number": 122372320,
       "project": "baidu/BunnyDo/bunnydo-frontend",
@@ -11,17 +33,6 @@
       "deletions": 482,
       "updated": "2026-09-02 20:49:51",
       "revision": "4d94e9f4c79171f48cb180dc9919b13899e49e58"
-    },
-    {
-      "number": 122362147,
-      "project": "baidu/personal-code/self-kanban",
-      "branch": "master",
-      "subject": "feat: 项目标题改为「度厂观测站」并微调图表",
-      "status": "OPEN",
-      "insertions": 0,
-      "deletions": 0,
-      "updated": "2026-09-02 15:26:50",
-      "revision": "47bcfc4b1a085155fa0d32f0f28a1500e97377ff"
     },
     {
       "number": 122357614,

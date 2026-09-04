@@ -62,17 +62,30 @@ function repoShortName(repoPath: string): string {
   return repoPath.split('/').pop() ?? repoPath
 }
 
-/** 从一串文本提取关键词（2-4 字中文词或 3+ 英文字母词，过滤停用词） */
+/** 从一串文本提取关键词（2-4 字中文词或 3+ 英文字母整词，过滤停用词） */
 function collectWords(events: EventItem[], metas: Record<string, EventMeta>): { name: string; value: number }[] {
   const freq = new Map<string, number>()
   const add = (t: string) => {
-    for (const m of t.match(/[\u4e00-\u9fa5]{2,4}|[a-zA-Z]{3,}/g) ?? []) {
+    if (!t) return
+    // 去掉常见前缀噪音：feat: / fix: / [Story] / bunnydo-44 卡片号 等
+    const clean = t
+      .replace(/^[a-z]+:\s*/i, '')
+      .replace(/^[\w-]+-\d+\s*\[[^\]]*\]\s*/i, '')
+      .replace(/^【[^】]*】/, '')
+    // 中文：取连续中文串整体（2-8 字），避免 2-4 字硬切成伪词；英文：按边界整词
+    for (const m of clean.match(/[\u4e00-\u9fa5]{2,8}|[a-zA-Z]{3,}/g) ?? []) {
       const w = m.toLowerCase()
       if (STOP_WORDS.has(w)) continue
       freq.set(w, (freq.get(w) ?? 0) + 1)
     }
   }
-  for (const e of events) add(e.title)
+  // 从原始数据内容摘要提取（reviews.subject / commits.subject / cards.title），而非归并后的一句话标题
+  for (const e of events) {
+    const raw = e.raw as { subject?: string; title?: string } | undefined
+    if (raw?.subject) add(raw.subject)
+    else if (raw?.title) add(raw.title)
+    else add(e.title)
+  }
   for (const m of Object.values(metas)) if (m.reflection) add(m.reflection)
   return [...freq.entries()].sort((a, b) => b[1] - a[1]).slice(0, 9).map(([name, value]) => ({ name, value }))
 }

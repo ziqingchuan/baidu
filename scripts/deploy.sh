@@ -2,15 +2,11 @@
 # 构建并部署到 popo。用法：
 #   pnpm deploy                    # 用默认 slug/title
 #   pnpm deploy [slug] [title]     # 自定义
-# 默认 slug=qingchuan-dashboard，title=度厂观测站
-# 流程：先拉取最新数据（export-data），再构建，再部署（带动态数据 Schema），再规划 member 角色权限。
-# 注意：不传 --visibility，保留 popo 上已设置的权限（可见范围）
-set -euo pipefail
-
-SLUG="${1:-qingchuan-dashboard}"
+# 默认 slug=personal-kanban，title=度厂观测站
+SLUG="${1:-personal-kanban}"
 TITLE="${2:-度厂观测站}"
-UPLOAD_SCRIPT="${POPO_UPLOAD_SCRIPT:-$HOME/.comate/skills/.system/popo/scripts/upload.py}"
-PERM_SCRIPT="${POPO_PERM_SCRIPT:-$HOME/.comate/skills/.system/popo/scripts/permissions.py}"
+UPLOAD_SCRIPT="${POPO_UPLOAD_SCRIPT:-$HOME/.comate/skills/popo/scripts/upload.py}"
+PERM_SCRIPT="${POPO_PERM_SCRIPT:-$HOME/.comate/skills/popo/scripts/permissions.py}"
 
 # 1) 拉取最新 iCode/iCafe 数据到 src/data/dashboard.json
 pnpm export-data
@@ -53,7 +49,8 @@ UPLOAD_OUT="$(
       "properties": {
         "category": { "type": "string", "description": "分类 id" },
         "keys": { "type": "array", "items": { "type": "string" }, "description": "该列任务 key 的有序数组" },
-        "updated_at": { "type": "string", "description": "更新时间 ISO" }
+        "updated_at": { "type": "string", "description": "更新时间 ISO" },
+        "state": { "type": "string", "description": "记录状态", "enum": ["active", "removed"] }
       },
       "required": ["category", "keys"]
     }
