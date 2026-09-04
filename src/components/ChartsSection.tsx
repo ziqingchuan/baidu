@@ -1,4 +1,4 @@
-import ReactEChartsCore from 'echarts-for-react/lib/core'
+import ReactEChartsCore from 'echarts-for-react/esm/core'
 import { Card, Col, Row } from 'antd'
 import type { BoardStats } from '../lib/boardStats'
 import type { ExtraStats } from '../lib/extraStats'
