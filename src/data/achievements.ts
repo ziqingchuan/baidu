@@ -131,10 +131,10 @@ export interface AchievementGroupDef {
 }
 
 export const ACHIEVEMENT_GROUPS: AchievementGroupDef[] = [
-  { id: 'onboarding', name: '起步', desc: '迈出第一步', ids: ['first-task', 'hard-1'] },
-  { id: 'engineering', name: '工程攻坚', desc: '能扛高难度 / 复杂工程，会重构与工程化建设', ids: ['hard-5', 'delete-5000', 'engineering-5'] },
+  { id: 'onboarding', name: '起步', desc: '迈出第一步', ids: ['first-task'] },
+  { id: 'engineering', name: '工程攻坚', desc: '能扛高难度 / 复杂工程，会重构与工程化建设', ids: ['hard-1', 'hard-5', 'delete-5000', 'engineering-5'] },
   { id: 'quality', name: '质量保障', desc: '交付可靠，善于定位与修复问题', ids: ['bugfix-5', 'hard-bug-5'] },
-  { id: 'outcome', name: '关键成果', desc: '做出被认可的核心产出', ids: ['copper-1', 'silver-3', 'first-gold', 'gold-3', 'awards-10', 'grand-slam'] },
+  { id: 'outcome', name: '关键成果', desc: '做出被认可的核心产出', ids: ['copper-1', 'first-gold', 'silver-3', 'gold-3', 'awards-10', 'grand-slam'] },
   { id: 'breadth', name: '广度深耕', desc: '技术视野广、业务理解深', ids: ['category-5', 'business-3', 'business-10'] },
   { id: 'consistency', name: '持续高效', desc: '产出稳定持续、规模可观', ids: ['workday-5', 'month-full', 'quarters-4', 'day-5', 'tasks-50', 'tasks-100', 'lines-10000'] },
   { id: 'reflection', name: '复盘沉淀', desc: '善于总结反思、自我迭代', ids: ['reflection-10', 'reflection-deep'] },
@@ -235,7 +235,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   {
     id: 'gold-3',
     name: '金牌大师',
-    desc: '累计完成 3 个金牌关键成果。',
+    desc: '累计获得 3 个金牌关键成果。',
     icon: medalIcon('gold-3'),
     check: (_e, m) => Object.values(m).filter((x) => x.award === 'gold').length >= 3,
     progress: (_e, m) => ({ current: Math.min(Object.values(m).filter((x) => x.award === 'gold').length, 3), target: 3 }),
