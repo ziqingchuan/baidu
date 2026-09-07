@@ -13,7 +13,7 @@
     "check-images": "node scripts/check-images.mjs",
     "deploy": "bash scripts/deploy.sh",
     "predeploy": "pnpm check-images",
-    "gh-deploy": "pnpm build && gh-pages -d dist",
+    "gh-deploy": "pnpm export-data && pnpm build && gh-pages -d dist",
     "pregh-deploy": "pnpm check-images"
   },
   "dependencies": {
