@@ -24,7 +24,7 @@ function indexCards(cards: Card[]): Map<string, Card> {
  */
 export function buildEvents(data: DashboardData): EventItem[] {
   const cardIndex = indexCards(data.cards)
-  const events: EventItem[] = []
+  let events: EventItem[] = []
   const orphanCommits: Commit[] = []
 
   // 第一遍：CR 骨架
@@ -90,6 +90,34 @@ export function buildEvents(data: DashboardData): EventItem[] {
       raw: c,
     })
   }
+
+  // 第四遍：同名任务去重（同一个 card / commit / CR 可能是同一件事，只保留一条展示）
+  // 保留信息更全的（card > review > commit，MERGED 优先），提交数累加、补齐关联编号
+  const rank = (e: EventItem): number =>
+    (e.source === 'card' ? 3 : e.source === 'review' ? 2 : 1) + (e.status === 'MERGED' ? 0.5 : 0)
+  const titleSeen = new Map<string, EventItem>()
+  const kept: EventItem[] = []
+  for (const ev of events) {
+    const titleKey = ev.title.trim().toLowerCase()
+    if (!titleKey) {
+      kept.push(ev)
+      continue
+    }
+    const existing = titleSeen.get(titleKey)
+    if (!existing) {
+      titleSeen.set(titleKey, ev)
+      continue
+    }
+    const keep = rank(ev) > rank(existing) ? ev : existing
+    const drop = keep === existing ? ev : existing
+    titleSeen.set(titleKey, {
+      ...keep,
+      commitCount: (existing.commitCount ?? 0) + (ev.commitCount ?? 0),
+      reviewNumber: keep.reviewNumber ?? drop.reviewNumber,
+      cardNumber: keep.cardNumber ?? drop.cardNumber,
+    })
+  }
+  events = [...kept, ...titleSeen.values()]
 
   events.sort((a, b) => (a.date < b.date ? 1 : -1))
   return events
