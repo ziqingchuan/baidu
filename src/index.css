@@ -357,6 +357,19 @@ body {
   flex-shrink: 0;
 }
 
+/* 拖拽落点占位槽（跨容器拖拽时显示，只做视觉占位、不改真实布局） */
+.kanban-drop-slot {
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  border: 1.5px dashed rgba(122, 167, 240, 0.6);
+  background: rgba(122, 167, 240, 0.06);
+}
+.kanban-unassigned-body .kanban-drop-slot.pool {
+  width: 260px;
+  height: 70px;
+}
+
 /* ===== 任务卡片 ===== */
 .board-card {
   position: relative;

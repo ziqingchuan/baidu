@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { Fragment, useCallback, useMemo, useRef, useState } from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -119,6 +119,8 @@ export default function KanbanBoard({ events, metas, columnOrder, setCategory, s
   const [sorts, setSorts] = useState<Partial<Record<CategoryId, SortSpec>>>({})
   // 拖拽期间的实时列顺序（让位动画由它驱动）；null 表示使用默认顺序
   const [dragItems, setDragItems] = useState<ColumnItems | null>(null)
+  // 跨容器拖拽的落点占位（容器 + 插入位置）：只做视觉占位，不改真实布局
+  const [dropTarget, setDropTarget] = useState<{ container: string; index: number } | null>(null)
   // 记录拖拽起点列，onDragEnd 与终点比较以持久化分类
   const startColRef = useRef<CategoryId | null>(null)
   // 上一次同列重排的 (active|over)，防止 rectSorting 下来回振荡触发 React #185（Maximum update depth）
@@ -207,6 +209,7 @@ export default function KanbanBoard({ events, metas, columnOrder, setCategory, s
   const handleDragStart = (e: DragStartEvent) => {
     const fromId = String(e.active.id)
     setActiveId(fromId)
+    setDropTarget(null)
     lastReorderRef.current = null
     startColRef.current = findContainer(fromId)
     setDragItems(
@@ -226,9 +229,32 @@ export default function KanbanBoard({ events, metas, columnOrder, setCategory, s
     const activeContainer = findContainer(active.id)
     const overContainer = findContainer(over.id)
     if (!activeContainer || !overContainer) return
-    // 跨容器：不实时改布局，等 onDragEnd 提交分类变更
-    if (activeContainer !== overContainer) return
 
+    // 跨容器（未分类池 ↔ 分类列）：不改真实布局（避免 dnd-kit measureRect 循环 / React #185），
+    // 只计算落点索引并显示占位槽；分类变更在 onDragEnd 通过 setCategory 提交。
+    if (activeContainer !== overContainer) {
+      const toItems = renderItems[overContainer] ?? []
+      const overKey = String(over.id)
+      let index = toItems.length
+      if (overKey !== overContainer) {
+        const overIndex = toItems.indexOf(overKey)
+        if (overIndex >= 0) {
+          const overRect = over.rect
+          const activeRect = active.rect.current.translated
+          const isBelow = activeRect && overRect ? activeRect.top > overRect.top + overRect.height : false
+          index = overIndex + (isBelow ? 1 : 0)
+        }
+      }
+      // 索引没变就不更新，避免占位来回跳动触发重渲染循环
+      setDropTarget((prev) => {
+        if (prev && prev.container === overContainer && prev.index === index) return prev
+        return { container: overContainer, index }
+      })
+      return
+    }
+
+    // 同容器：列内重排（真实让位动画）
+    setDropTarget(null)
     setDragItems((prev) => {
       if (!prev) return prev
       const fromKey = String(active.id)
@@ -263,6 +289,7 @@ export default function KanbanBoard({ events, metas, columnOrder, setCategory, s
     }
     setActiveId(null)
     setDragItems(null)
+    setDropTarget(null)
     startColRef.current = null
     lastReorderRef.current = null
   }
@@ -316,6 +343,7 @@ export default function KanbanBoard({ events, metas, columnOrder, setCategory, s
       onDragCancel={() => {
         setActiveId(null)
         setDragItems(null)
+        setDropTarget(null)
         startColRef.current = null
         lastReorderRef.current = null
       }}
@@ -378,19 +406,26 @@ export default function KanbanBoard({ events, metas, columnOrder, setCategory, s
               <div className="kanban-column-hint">{col.hint}</div>
               <SortableContext items={keys} strategy={verticalListSortingStrategy}>
                 <div className="kanban-column-body">
-                  {keys.map((key) => {
+                  {keys.map((key, i) => {
                     const ev = eventMap.get(key)
                     if (!ev) return null
                     return (
-                      <BoardCard
-                        key={ev.key}
-                        event={ev}
-                        meta={metas[ev.key]}
-                        disabled={!editable}
-                        onClick={() => handleCardClick(ev.key)}
-                      />
+                      <Fragment key={ev.key}>
+                        {dropTarget?.container === col.id && dropTarget.index === i && (
+                          <div className="kanban-drop-slot" />
+                        )}
+                        <BoardCard
+                          event={ev}
+                          meta={metas[ev.key]}
+                          disabled={!editable}
+                          onClick={() => handleCardClick(ev.key)}
+                        />
+                      </Fragment>
                     )
                   })}
+                  {dropTarget?.container === col.id && dropTarget.index >= keys.length && (
+                    <div className="kanban-drop-slot" />
+                  )}
                 </div>
               </SortableContext>
             </ColumnShell>
@@ -410,21 +445,29 @@ export default function KanbanBoard({ events, metas, columnOrder, setCategory, s
         <div className="kanban-unassigned-hint">从下方拖拽卡片到上方对应分类中，完成归类</div>
         {/* 未分类池仅可拖出/拖入，不参与池内排序：纯拖拽，避免 rectSortingStrategy 干扰上方列滚动 / 触发 React #185 */}
         <div className="kanban-unassigned-body">
-          {unassignedKeys.map((key) => {
+          {unassignedKeys.map((key, i) => {
             const ev = eventMap.get(key)
             if (!ev) return null
             return (
-              <div className="kanban-unassigned-card" key={ev.key}>
-                <BoardCard
-                  event={ev}
-                  meta={metas[ev.key]}
-                  disabled={!editable}
-                  onClick={() => handleCardClick(ev.key)}
-                  sortable={false}
-                />
-              </div>
+              <Fragment key={ev.key}>
+                {dropTarget?.container === UNASSIGNED_ID && dropTarget.index === i && (
+                  <div className="kanban-drop-slot pool" />
+                )}
+                <div className="kanban-unassigned-card">
+                  <BoardCard
+                    event={ev}
+                    meta={metas[ev.key]}
+                    disabled={!editable}
+                    onClick={() => handleCardClick(ev.key)}
+                    sortable={false}
+                  />
+                </div>
+              </Fragment>
             )
           })}
+          {dropTarget?.container === UNASSIGNED_ID && dropTarget.index >= unassignedKeys.length && (
+            <div className="kanban-drop-slot pool" />
+          )}
         </div>
       </UnassignedShell>
 
