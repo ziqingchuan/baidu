@@ -1111,3 +1111,42 @@ body {
 .sk.blk.b-table { height: 380px; }
 .sk-board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; padding: 16px; }
 .sk-board .sk.blk { height: 420px; }
+
+/* 错误边界兜底页（懒加载 chunk 失效 / 异常时展示，避免白屏） */
+.boundary-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 60vh;
+  text-align: center;
+  padding: 24px;
+}
+.boundary-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #3a4150;
+}
+.boundary-desc {
+  font-size: 13px;
+  color: #8a93a5;
+  max-width: 420px;
+  line-height: 1.7;
+}
+.boundary-btn {
+  margin-top: 6px;
+  padding: 8px 26px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #7aa7f0, #6b8fe8);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(107, 143, 232, 0.28);
+  transition: all 0.2s ease;
+}
+.boundary-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(107, 143, 232, 0.36);
+}

@@ -12,6 +12,7 @@ import KanbanBoard from './components/KanbanBoard'
 import ChartsSection from './components/ChartsSection'
 import ReflectionWall from './components/ReflectionWall'
 import { PageSkeleton } from './components/Skeletons'
+import ErrorBoundary from './components/ErrorBoundary'
 import avatarPng from './assets/avatar.webp'
 import notsignedPng from './assets/notsigned.webp'
 
@@ -30,9 +31,10 @@ function lazyRetry<T extends ComponentType<any>>(factory: () => Promise<{ defaul
         if (!sessionStorage.getItem('chunk-reload-attempt')) {
           sessionStorage.setItem('chunk-reload-attempt', '1')
           window.location.reload()
+          return new Promise<{ default: T }>(() => {})
         }
-        // 已尝试过仍失败：返回永不 resolve 的 promise，避免 React 继续渲染报错
-        return new Promise<{ default: T }>(() => {})
+        // 已刷新仍失败（如代理仍缓存旧 index）：抛给 ErrorBoundary 显示兜底页而非白屏
+        return Promise.reject(new Error('Failed to fetch dynamically imported module'))
       }),
   )
 }
@@ -202,7 +204,8 @@ function AppContent() {
             {!board.ready ? (
               <PageSkeleton view={view} />
             ) : (
-              <Suspense fallback={<PageSkeleton view={view} />}>
+              <ErrorBoundary>
+                <Suspense fallback={<PageSkeleton view={view} />}>
                 {view === 'board' ? (
                   <KanbanBoard
                     events={filteredEvents}
@@ -225,7 +228,8 @@ function AppContent() {
                 ) : (
                   <ChartsSection stats={stats} extra={extra} />
                 )}
-              </Suspense>
+                </Suspense>
+              </ErrorBoundary>
             )}
           </main>
 
