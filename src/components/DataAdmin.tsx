@@ -21,16 +21,10 @@ interface RawRecord {
 }
 
 /** 数据源：Supabase 云端表 / 脚本抓取的原始数据表 */
-type TableName =
-  | 'event_meta'
-  | 'column_order'
-  | 'reviews'
-  | 'commits'
-  | 'cards'
+type TableName = 'event_meta' | 'reviews' | 'commits' | 'cards'
 
 const TABLE_NAMES: Record<TableName, string> = {
   event_meta: '任务标注表（event_meta）',
-  column_order: '列顺序表（column_order）',
   reviews: 'CR 评审（reviews）',
   commits: '提交记录（commits）',
   cards: '卡片（cards）',
@@ -189,7 +183,7 @@ function recordSearchText(t: TableName, r: RawRecord): string {
 }
 
 /** 数据源类型：Supabase 云端表还是本地脚本原始数据 */
-const POPO_TABLES: TableName[] = ['event_meta', 'column_order']
+const POPO_TABLES: TableName[] = ['event_meta']
 
 /**
  * 数据管理后台：把 Supabase 云端表 + 脚本抓取的原始数据表（reviews/commits/cards）可视化，
@@ -227,13 +221,6 @@ export default function DataAdmin() {
     for (const c of dash.data.cards) m.set(`card:${c.space}-${c.sequence}`, { table: 'cards', label: `卡片 ${c.space}-${c.sequence}`, title: c.title })
     return m
   }, [dash.data])
-
-  /** 事件标题索引：event_key -> title，供列顺序表的任务列表展示可读标题 */
-  const titleMap = useMemo(() => {
-    const m = new Map<string, string>()
-    for (const e of dash.events) m.set(e.key, e.title)
-    return m
-  }, [dash.events])
 
   // 请求序号：切表/刷新时旧请求返回后不覆盖当前表数据（避免竞态）
   const loadSeqRef = useRef(0)
@@ -289,32 +276,12 @@ export default function DataAdmin() {
       .catch(() => {})
   }, [])
 
-  /** 列顺序表：把每列的 keys 展开成"一行一条任务"的扁平行（序号 + 标题），替代 6 行的标签列表 */
-  const orderFlatRows = useMemo<RawRecord[]>(() => {
-    if (table !== 'column_order') return []
-    const out: RawRecord[] = []
-    for (const r of records) {
-      const keys = (r.data?.keys as unknown[]) ?? []
-      const cat = String(r.data?.category ?? '')
-      const updated = r.data?.updated_at ?? ''
-      keys.forEach((k, i) => {
-        out.push({
-          id: `${r.id}-${i + 1}`,
-          data: { category: cat, order: i + 1, key: String(k), updated_at: updated },
-        })
-      })
-    }
-    return out
-  }, [table, records])
-
-  const sourceRows = table === 'column_order' ? orderFlatRows : records
-
-  // 搜索过滤：对 key / id / data 内容检索
+  /** 列顺序表已移除，直接以当前表记录为搜索源 */
   const filtered = useMemo(() => {
     const kw = keyword.trim().toLowerCase()
-    if (!kw) return sourceRows
-    return sourceRows.filter((r) => recordSearchText(table, r).includes(kw))
-  }, [sourceRows, keyword, table])
+    if (!kw) return records
+    return records.filter((r) => recordSearchText(table, r).includes(kw))
+  }, [records, keyword, table])
 
   // 切换表/搜索时回到第一页
   useEffect(() => {
@@ -326,7 +293,7 @@ export default function DataAdmin() {
   const [exportSelected, setExportSelected] = useState<TableName[]>([])
   const [exporting, setExporting] = useState(false)
 
-  const ALL_TABLES: TableName[] = ['event_meta', 'column_order', 'reviews', 'commits', 'cards']
+  const ALL_TABLES: TableName[] = ['event_meta', 'reviews', 'commits', 'cards']
 
   const openExport = () => {
     setExportSelected([...ALL_TABLES])
@@ -521,6 +488,9 @@ export default function DataAdmin() {
       title: '更新时间',
       dataIndex: ['data', 'updated_at'],
       width: 190,
+      sorter: (a: RawRecord, b: RawRecord) =>
+        String(a.data?.updated_at ?? '').localeCompare(String(b.data?.updated_at ?? '')),
+      sortDirections: ['ascend', 'descend'],
       render: (v: unknown) => {
         const t = String(v ?? '')
         if (!t) return <span className="admin-null">（空）</span>
@@ -539,50 +509,6 @@ export default function DataAdmin() {
       render: (_v: unknown, r: RawRecord) => {
         const like = Number(r.data?.like_count) || 0
         return like > 0 ? <span className="admin-like">♥ {like}</span> : <span className="admin-null">0</span>
-      },
-    },
-  ]
-
-  // ---------- column_order 列（每任务一行，含序号） ----------
-  const orderColumns: TableProps<RawRecord>['columns'] = [
-    {
-      title: '分类',
-      dataIndex: ['data', 'category'],
-      width: 110,
-      align: 'center',
-      render: (v: unknown) => {
-        const c = categoryById((v as CategoryId) || undefined)
-        return c ? <Tag color={c.color}>{c.name}</Tag> : cell(v)
-      },
-    },
-    {
-      title: '序号',
-      dataIndex: ['data', 'order'],
-      width: 64,
-      align: 'center',
-      render: (v: unknown) => <span className="admin-mono">{String(v ?? '')}</span>,
-    },
-    {
-      title: '任务标题',
-      dataIndex: ['data', 'key'],
-      render: (_v: unknown, r: RawRecord) => {
-        const key = String(r.data?.key ?? '')
-        const title = titleMap.get(key) ?? key
-        return (
-          <Tooltip title={`${key}\n${title}`} placement="topLeft">
-            <span className="admin-mono">{title}</span>
-          </Tooltip>
-        )
-      },
-    },
-    {
-      title: '更新时间',
-      dataIndex: ['data', 'updated_at'],
-      width: 190,
-      align: 'center',
-      render: (v: unknown) => {
-        const t = String(v ?? '')
-        return <span className="admin-mono admin-time-cell">{formatTime(t) || '（空）'}</span>
       },
     },
   ]
@@ -708,13 +634,11 @@ export default function DataAdmin() {
   const columns: TableProps<RawRecord>['columns'] =
     table === 'event_meta'
       ? eventColumns
-      : table === 'column_order'
-        ? orderColumns
-        : table === 'reviews'
-          ? reviewsColumns
-          : table === 'commits'
-            ? commitsColumns
-            : cardsColumns
+      : table === 'reviews'
+        ? reviewsColumns
+        : table === 'commits'
+          ? commitsColumns
+          : cardsColumns
 
   /** 刷新提示文案（原始数据表用本地快照，云端表用 Supabase） */
   const isPopoTable = POPO_TABLES.includes(table)
@@ -743,7 +667,6 @@ export default function DataAdmin() {
         onChange={(v) => setTable(v as TableName)}
         options={[
           { value: 'event_meta', label: TABLE_NAMES.event_meta },
-          { value: 'column_order', label: TABLE_NAMES.column_order },
           { value: 'reviews', label: TABLE_NAMES.reviews },
           { value: 'commits', label: TABLE_NAMES.commits },
           { value: 'cards', label: TABLE_NAMES.cards },
