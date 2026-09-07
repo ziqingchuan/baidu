@@ -1,4 +1,5 @@
 import { lazy, Suspense, useMemo, useState } from 'react'
+import type { ComponentType } from 'react'
 import { ConfigProvider, App as AntApp, Segmented, Tooltip, Select, theme, Modal, Input, Popconfirm } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
 import { useDashboardData } from './lib/useDashboardData'
@@ -14,9 +15,31 @@ import { PageSkeleton } from './components/Skeletons'
 import avatarPng from './assets/avatar.webp'
 import notsignedPng from './assets/notsigned.webp'
 
+/**
+ * 懒加载 + 部署后旧 chunk 失效兜底：部署后浏览器可能仍引用旧 hash 的 chunk（404），
+ * 捕获后整页刷新拉新版本，避免点 tab 白屏；sessionStorage 标记防止刷新后仍失败时无限刷新。
+ */
+function lazyRetry<T extends ComponentType<any>>(factory: () => Promise<{ default: T }>) {
+  return lazy(() =>
+    factory()
+      .then((m) => {
+        sessionStorage.removeItem('chunk-reload-attempt')
+        return m
+      })
+      .catch(() => {
+        if (!sessionStorage.getItem('chunk-reload-attempt')) {
+          sessionStorage.setItem('chunk-reload-attempt', '1')
+          window.location.reload()
+        }
+        // 已尝试过仍失败：返回永不 resolve 的 promise，避免 React 继续渲染报错
+        return new Promise<{ default: T }>(() => {})
+      }),
+  )
+}
+
 // 数据图表是默认首页，echarts 必须首屏预加载（不懒加载）；成就勋章/数据管理保持按需下载
-const AchievementWall = lazy(() => import('./components/AchievementWall'))
-const DataAdmin = lazy(() => import('./components/DataAdmin'))
+const AchievementWall = lazyRetry(() => import('./components/AchievementWall'))
+const DataAdmin = lazyRetry(() => import('./components/DataAdmin'))
 import type { EventItem } from './types'
 import type { BusinessId } from './lib/business'
 
