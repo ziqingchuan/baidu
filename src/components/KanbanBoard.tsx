@@ -230,6 +230,8 @@ export default function KanbanBoard({ events, metas, columnOrder, setCategory, s
 
       // 同列：arrayMove 重排 → 卡片让位并记录新顺序
       if (activeContainer === overContainer) {
+        // 未分类池不支持池内排序，只允许拖入/拖出
+        if (activeContainer === UNASSIGNED_ID) return prev
         const oldIndex = fromItems.indexOf(fromKey)
         const newIndex = fromItems.indexOf(String(over.id))
         if (oldIndex < 0 || newIndex < 0 || oldIndex === newIndex) return prev
