@@ -214,56 +214,36 @@ export default function KanbanBoard({ events, metas, columnOrder, setCategory, s
     )
   }
 
-  /** 拖拽中实时移动卡片：同列重排 / 跨列插入，触发真实让位动画 */
+  /**
+   * 拖拽中实时移动：仅处理同容器内的列内重排（真实让位动画）。
+   * 跨容器（未分类池 ↔ 分类列）不在此实时改布局 —— 拖拽中改布局会让 droppable 矩形
+   * 每次测量都变化，触发 dnd-kit measureRect 无限 setState（React #185）。
+   * 分类变更统一在 onDragEnd 通过 setCategory 提交。
+   */
   const handleDragOver = (e: DragOverEvent) => {
     const { active, over } = e
     if (!over) return
     const activeContainer = findContainer(active.id)
     const overContainer = findContainer(over.id)
     if (!activeContainer || !overContainer) return
+    // 跨容器：不实时改布局，等 onDragEnd 提交分类变更
+    if (activeContainer !== overContainer) return
 
     setDragItems((prev) => {
       if (!prev) return prev
       const fromKey = String(active.id)
       const fromItems = prev[activeContainer]
-
-      // 同列：arrayMove 重排 → 卡片让位并记录新顺序
-      if (activeContainer === overContainer) {
-        // 未分类池不支持池内排序，只允许拖入/拖出
-        if (activeContainer === UNASSIGNED_ID) return prev
-        const oldIndex = fromItems.indexOf(fromKey)
-        const newIndex = fromItems.indexOf(String(over.id))
-        if (oldIndex < 0 || newIndex < 0 || oldIndex === newIndex) return prev
-        // 防振荡：同一对 (active|over) 重复触发会让顺序来回翻转，导致无限重渲染（React #185）。
-        // 同列重排中同对只移动一次，切断来回翻转。
-        const sig = `${active.id}|${over.id}`
-        if (lastReorderRef.current === sig) return prev
-        lastReorderRef.current = sig
-        return { ...prev, [activeContainer]: arrayMove(fromItems, oldIndex, newIndex) }
-      }
-
-      // 跨列：根据悬停位置插入目标列对应 index
+      // 未分类池不支持池内排序，只允许拖入/拖出
+      if (activeContainer === UNASSIGNED_ID) return prev
       const oldIndex = fromItems.indexOf(fromKey)
-      if (oldIndex < 0) return prev
-      const toItems = prev[overContainer]
-      const overKey = String(over.id)
-
-      let newIndex: number
-      if (toItems.includes(overKey)) {
-        // 悬停在目标列某卡片上：根据 active 在其上方/下方决定插前/插后
-        const overRect = over.rect
-        const activeRect = active.rect.current.translated
-        const isBelow =
-          activeRect && overRect ? activeRect.top > overRect.top + overRect.height : false
-        newIndex = toItems.indexOf(overKey) + (isBelow ? 1 : 0)
-      } else {
-        // 悬停在列/空白区：追加到末尾
-        newIndex = toItems.length
-      }
-
-      const fromArr = fromItems.filter((k) => k !== fromKey)
-      const toArr = [...toItems.slice(0, newIndex), fromKey, ...toItems.slice(newIndex)]
-      return { ...prev, [activeContainer]: fromArr, [overContainer]: toArr }
+      const newIndex = fromItems.indexOf(String(over.id))
+      if (oldIndex < 0 || newIndex < 0 || oldIndex === newIndex) return prev
+      // 防振荡：同一对 (active|over) 重复触发会让顺序来回翻转，导致无限重渲染（React #185）。
+      // 同列重排中同对只移动一次，切断来回翻转。
+      const sig = `${active.id}|${over.id}`
+      if (lastReorderRef.current === sig) return prev
+      lastReorderRef.current = sig
+      return { ...prev, [activeContainer]: arrayMove(fromItems, oldIndex, newIndex) }
     })
   }
 
