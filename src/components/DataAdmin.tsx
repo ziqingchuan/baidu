@@ -48,6 +48,12 @@ function ago(iso?: string): string {
   return '刚刚'
 }
 
+/** 2026-09-03T03:18:37.568+00:00 -> 2026-09-03 03:18:37 */
+function formatTime(iso?: string): string {
+  const t = String(iso ?? '')
+  return t ? t.slice(0, 19).replace('T', ' ') : ''
+}
+
 /** 把任意值转成可读短文本，undefined/null/空串显示灰色占位 */
 function cell(value: unknown): React.ReactNode {
   if (value === undefined || value === null || value === '') {
@@ -283,12 +289,32 @@ export default function DataAdmin() {
       .catch(() => {})
   }, [])
 
+  /** 列顺序表：把每列的 keys 展开成"一行一条任务"的扁平行（序号 + 标题），替代 6 行的标签列表 */
+  const orderFlatRows = useMemo<RawRecord[]>(() => {
+    if (table !== 'column_order') return []
+    const out: RawRecord[] = []
+    for (const r of records) {
+      const keys = (r.data?.keys as unknown[]) ?? []
+      const cat = String(r.data?.category ?? '')
+      const updated = r.data?.updated_at ?? ''
+      keys.forEach((k, i) => {
+        out.push({
+          id: `${r.id}-${i + 1}`,
+          data: { category: cat, order: i + 1, key: String(k), updated_at: updated },
+        })
+      })
+    }
+    return out
+  }, [table, records])
+
+  const sourceRows = table === 'column_order' ? orderFlatRows : records
+
   // 搜索过滤：对 key / id / data 内容检索
   const filtered = useMemo(() => {
     const kw = keyword.trim().toLowerCase()
-    if (!kw) return records
-    return records.filter((r) => recordSearchText(table, r).includes(kw))
-  }, [records, keyword, table])
+    if (!kw) return sourceRows
+    return sourceRows.filter((r) => recordSearchText(table, r).includes(kw))
+  }, [sourceRows, keyword, table])
 
   // 切换表/搜索时回到第一页
   useEffect(() => {
@@ -422,10 +448,10 @@ export default function DataAdmin() {
     {
       title: 'event_key',
       dataIndex: ['data', 'event_key'],
-      width: 210,
+      width: 170,
       render: (v: unknown) => (
         <Tooltip title={String(v ?? '')} placement="topLeft">
-          <span className="admin-mono">{String(v ?? '') || <span className="admin-null">（空）</span>}</span>
+          <span className="admin-mono admin-key-cell">{String(v ?? '') || <span className="admin-null">（空）</span>}</span>
         </Tooltip>
       ),
     },
@@ -492,15 +518,15 @@ export default function DataAdmin() {
       render: (v: unknown) => (String(v ?? '').trim() ? <span className="admin-arr">有</span> : <span className="admin-null">无</span>),
     },
     {
-      title: 'updated_at',
+      title: '更新时间',
       dataIndex: ['data', 'updated_at'],
-      width: 128,
+      width: 190,
       render: (v: unknown) => {
         const t = String(v ?? '')
         if (!t) return <span className="admin-null">（空）</span>
         return (
-          <Tooltip title={`${t}\n数据更新时间，距今 ${ago(t)}`}>
-            <span className="admin-mono">{t.slice(0, 19).replace('T', ' ')}</span>
+          <Tooltip title={`${formatTime(t)}\n距今 ${ago(t)}`}>
+            <span className="admin-mono admin-time-cell">{formatTime(t)}</span>
           </Tooltip>
         )
       },
@@ -517,20 +543,12 @@ export default function DataAdmin() {
     },
   ]
 
-  // ---------- column_order 列 ----------
+  // ---------- column_order 列（每任务一行，含序号） ----------
   const orderColumns: TableProps<RawRecord>['columns'] = [
-    {
-      title: '记录 ID',
-      dataIndex: 'id',
-      width: 100,
-      fixed: 'left',
-      align: 'center',
-      render: (v: RawRecord['id']) => idTag(v),
-    },
     {
       title: '分类',
       dataIndex: ['data', 'category'],
-      width: 120,
+      width: 110,
       align: 'center',
       render: (v: unknown) => {
         const c = categoryById((v as CategoryId) || undefined)
@@ -538,63 +556,33 @@ export default function DataAdmin() {
       },
     },
     {
-      title: '任务数',
-      dataIndex: ['data', 'keys'],
-      width: 80,
+      title: '序号',
+      dataIndex: ['data', 'order'],
+      width: 64,
       align: 'center',
-      render: (_v: unknown, r: RawRecord) => {
-        const arr = r.data?.keys as unknown[] | undefined
-        return arr ? <span className="admin-mono">{arr.length} 项</span> : <span className="admin-null">（空）</span>
-      },
+      render: (v: unknown) => <span className="admin-mono">{String(v ?? '')}</span>,
     },
     {
-      title: '任务列表（按序）',
-      dataIndex: ['data', 'keys'],
+      title: '任务标题',
+      dataIndex: ['data', 'key'],
       render: (_v: unknown, r: RawRecord) => {
-        const keys = (r.data?.keys as unknown[]) ?? []
-        if (!keys.length) return <span className="admin-null">（空）</span>
-        const titles = keys.map((k) => titleMap.get(String(k)) ?? String(k))
-        const SHOW = 5
-        const visible = titles.slice(0, SHOW)
-        const rest = titles.slice(SHOW)
+        const key = String(r.data?.key ?? '')
+        const title = titleMap.get(key) ?? key
         return (
-          <div className="admin-keys">
-            {visible.map((t, i) => (
-              <Tag key={i} color="default" style={{ fontSize: 11, marginInlineEnd: 0 }}>
-                {t}
-              </Tag>
-            ))}
-            {rest.length > 0 && (
-              <Tooltip
-                title={
-                  <div className="admin-keys-tip">
-                    {titles.map((t, i) => (
-                      <div key={i}>
-                        {i + 1}. {t}
-                      </div>
-                    ))}
-                  </div>
-                }
-              >
-                <span className="admin-more">+{rest.length}</span>
-              </Tooltip>
-            )}
-          </div>
+          <Tooltip title={`${key}\n${title}`} placement="topLeft">
+            <span className="admin-mono">{title}</span>
+          </Tooltip>
         )
       },
     },
     {
-      title: 'updated_at',
+      title: '更新时间',
       dataIndex: ['data', 'updated_at'],
       width: 190,
       align: 'center',
       render: (v: unknown) => {
         const t = String(v ?? '')
-        return (
-          <Tooltip title={`${t}（距今 ${ago(t)}）`}>
-            <span className="admin-mono">{t || '（空）'}</span>
-          </Tooltip>
-        )
+        return <span className="admin-mono admin-time-cell">{formatTime(t) || '（空）'}</span>
       },
     },
   ]
