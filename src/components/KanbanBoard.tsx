@@ -122,6 +122,8 @@ export default function KanbanBoard({ events, metas, columnOrder, setCategory, s
   const [dragItems, setDragItems] = useState<ColumnItems | null>(null)
   // 记录拖拽起点列，onDragEnd 与终点比较以持久化分类
   const startColRef = useRef<CategoryId | null>(null)
+  // 上一次同列重排的 (active|over)，防止 rectSorting 下来回振荡触发 React #185（Maximum update depth）
+  const lastReorderRef = useRef<string | null>(null)
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
 
@@ -206,6 +208,7 @@ export default function KanbanBoard({ events, metas, columnOrder, setCategory, s
   const handleDragStart = (e: DragStartEvent) => {
     const fromId = String(e.active.id)
     setActiveId(fromId)
+    lastReorderRef.current = null
     startColRef.current = findContainer(fromId)
     setDragItems(
       Object.fromEntries(Object.entries(defaultItems).map(([k, v]) => [k, [...v]])) as ColumnItems,
@@ -230,6 +233,11 @@ export default function KanbanBoard({ events, metas, columnOrder, setCategory, s
         const oldIndex = fromItems.indexOf(fromKey)
         const newIndex = fromItems.indexOf(String(over.id))
         if (oldIndex < 0 || newIndex < 0 || oldIndex === newIndex) return prev
+        // 防振荡：同一对 (active|over) 重复触发会让顺序来回翻转，导致无限重渲染（React #185）。
+        // 同列重排中同对只移动一次，切断来回翻转。
+        const sig = `${active.id}|${over.id}`
+        if (lastReorderRef.current === sig) return prev
+        lastReorderRef.current = sig
         return { ...prev, [activeContainer]: arrayMove(fromItems, oldIndex, newIndex) }
       }
 
@@ -275,6 +283,7 @@ export default function KanbanBoard({ events, metas, columnOrder, setCategory, s
     setActiveId(null)
     setDragItems(null)
     startColRef.current = null
+    lastReorderRef.current = null
   }
 
   /** 点击卡片：登录后打开编辑弹窗；未登录提示登录 */
@@ -327,6 +336,7 @@ export default function KanbanBoard({ events, metas, columnOrder, setCategory, s
         setActiveId(null)
         setDragItems(null)
         startColRef.current = null
+        lastReorderRef.current = null
       }}
     >
       {/* 五个分类列 */}
