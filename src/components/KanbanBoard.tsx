@@ -16,7 +16,6 @@ import {
 import {
   SortableContext,
   verticalListSortingStrategy,
-  rectSortingStrategy,
   arrayMove,
 } from '@dnd-kit/sortable'
 import { Badge, Tooltip, App as AntApp } from 'antd'
@@ -30,7 +29,7 @@ import type { EventItem, EventMeta } from '../types'
 import { CATEGORIES, UNASSIGNED_CATEGORY, softTint, type CategoryId } from '../lib/categories'
 import type { BusinessId } from '../lib/business'
 import { businessById } from '../lib/business'
-import BoardCard from './BoardCard'
+import BoardCard, { CardView } from './BoardCard'
 import EventEditModal from './EventEditModal'
 import { effectiveCategory } from '../lib/boardStats'
 
@@ -429,30 +428,31 @@ export default function KanbanBoard({ events, metas, columnOrder, setCategory, s
           <Badge count={unassignedKeys.length} showZero color={UNASSIGNED_CATEGORY.color} />
         </div>
         <div className="kanban-unassigned-hint">从下方拖拽卡片到上方对应分类中，完成归类</div>
-        <SortableContext items={unassignedKeys} strategy={rectSortingStrategy}>
-          <div className="kanban-unassigned-body">
-            {unassignedKeys.map((key) => {
-              const ev = eventMap.get(key)
-              if (!ev) return null
-              return (
-                <div className="kanban-unassigned-card" key={ev.key}>
-                  <BoardCard
-                    event={ev}
-                    meta={metas[ev.key]}
-                    disabled={!editable}
-                    onClick={() => handleCardClick(ev.key)}
-                  />
-                </div>
-              )
-            })}
-          </div>
-        </SortableContext>
+        {/* 未分类池仅可拖出/拖入，不参与池内排序：纯拖拽，避免 rectSortingStrategy 干扰上方列滚动 / 触发 React #185 */}
+        <div className="kanban-unassigned-body">
+          {unassignedKeys.map((key) => {
+            const ev = eventMap.get(key)
+            if (!ev) return null
+            return (
+              <div className="kanban-unassigned-card" key={ev.key}>
+                <BoardCard
+                  event={ev}
+                  meta={metas[ev.key]}
+                  disabled={!editable}
+                  onClick={() => handleCardClick(ev.key)}
+                  sortable={false}
+                />
+              </div>
+            )
+          })}
+        </div>
       </UnassignedShell>
 
       <DragOverlay>
         {activeEvent ? (
           <div style={{ width: 240 }}>
-            <BoardCard event={activeEvent} meta={metas[activeEvent.key]} onClick={() => {}} />
+            {/* 覆盖层用无 dnd hooks 的纯卡片，避免与源卡片重复注册触发重渲染循环 */}
+            <CardView event={activeEvent} meta={metas[activeEvent.key]} onClick={() => {}} />
           </div>
         ) : null}
       </DragOverlay>
