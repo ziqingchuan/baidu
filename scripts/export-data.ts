@@ -15,6 +15,9 @@ import { fileURLToPath } from 'node:url'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const DATA_DIR = join(__dirname, '..', 'src', 'data')
 
+/** 排除的代码库：不拉取这些仓库的数据（CR / 提交） */
+const EXCLUDED_PROJECTS = new Set(['baidu/qualifiedcoder/ziqingchuan', 'baidu/qac/ziqingchuan'])
+
 interface Review {
   number: number
   project: string
@@ -151,6 +154,7 @@ function runJson(cmd: string): any {
 /** 拉取某个状态下的全部评审（分页） */
 function fetchReviews(): Review[] {
   const out: Review[] = []
+  let skipped = 0
   for (const status of ['OPEN', 'MERGED', 'ABANDONED']) {
     let start = 0
     // 最多拉 10 页，防止死循环
@@ -158,6 +162,11 @@ function fetchReviews(): Review[] {
       const json = runJson(`icode-cli api get_my_reviews --status ${status} --with-diff-info --start-from ${start} -o json`)
       if (!json?.data?.changes?.length) break
       for (const c of json.data.changes) {
+        // 过滤指定代码库的 CR
+        if (EXCLUDED_PROJECTS.has(c.project)) {
+          skipped++
+          continue
+        }
         out.push({
           number: c._number,
           project: c.project,
@@ -176,6 +185,7 @@ function fetchReviews(): Review[] {
   }
   // 按更新时间倒序
   out.sort((a, b) => (a.updated < b.updated ? 1 : -1))
+  if (skipped) console.log(`[info] 已过滤 ${skipped} 条排除代码库的 CR`)
   return out
 }
 
@@ -183,6 +193,7 @@ function fetchReviews(): Review[] {
 function fetchCommits(): Commit[] {
   const seen = new Set<string>()
   const out: Commit[] = []
+  let skipped = 0
   const START = new Date('2026-01-01')
   const END = new Date()
   for (let d = new Date(START); d <= END; d.setMonth(d.getMonth() + 1)) {
@@ -198,6 +209,12 @@ function fetchCommits(): Commit[] {
       if (!results.length) break
       for (const r of results) {
         if (!r.commitId || seen.has(r.commitId)) continue
+        // 过滤指定代码库的提交（API 仓库字段名做兼容）
+        const repo = String(r.project ?? r.repoName ?? r.repo ?? r.repository ?? '')
+        if (repo && EXCLUDED_PROJECTS.has(repo)) {
+          skipped++
+          continue
+        }
         seen.add(r.commitId)
         out.push({
           commitId: r.commitId,
@@ -214,6 +231,7 @@ function fetchCommits(): Commit[] {
     }
   }
   out.sort((a, b) => (a.commitTime < b.commitTime ? 1 : -1))
+  if (skipped) console.log(`[info] 已过滤 ${skipped} 条排除代码库的提交`)
   return out
 }
 
