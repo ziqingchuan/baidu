@@ -186,6 +186,8 @@ body {
   height: calc(100vh - 190px);
   min-height: 360px;
   max-height: 800px;
+  /* 关键：裁剪列内容，防止列体溢出向下盖住未分类池，干扰池内拖拽 */
+  overflow: hidden;
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 .kanban-column:hover {
@@ -291,7 +293,8 @@ body {
   flex-direction: column;
   gap: 9px;
   flex: 1;
-  min-height: 40px;
+  /* min-height: 0 允许 flex 子项收缩，配合 overflow-y 在列内滚动，而不是撑高溢出容器 */
+  min-height: 0;
   overflow-y: auto;
   padding-right: 2px;
 }
