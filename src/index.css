@@ -811,6 +811,21 @@ body {
   text-align: left;
 }
 .admin-link:hover { text-decoration: underline; }
+.admin-annotation {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+}
+.admin-annotation .admin-mono {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+  vertical-align: middle;
+}
+.admin-annotated { font-size: 11px; color: #67b26f; }
 .admin-diff { color: #e8849a; font-size: 12px; font-weight: 600; }
 .admin-like { color: #e87a9a; font-size: 12px; font-weight: 600; }
 .admin-mock-tip {

@@ -380,18 +380,25 @@ export default function DataAdmin() {
     setKeyword(key)
   }
 
-  /** 标注单元格：有标注显示分类/难度并跳回 event_meta，无标注灰色提示 */
+  /** 标注单元格：显示该行对应的 event_key（即标注表里的键），点击跳回 event_meta；附标注状态 */
   const annotationCell = (ek: string): React.ReactNode => {
     const ann = annotationIndex.get(ek)
-    if (!ann) return <span className="admin-null">未标注</span>
-    const c = categoryById(ann.category as CategoryId)
+    const cat = ann ? categoryById(ann.category as CategoryId) : undefined
     return (
-      <Tooltip title={ann.reflection ? `已标注，有反思：${ann.reflection.slice(0, 30)}` : '已标注，点击查看标注详情'}>
-        <button type="button" className="admin-link" onClick={() => jumpTo('event_meta', ek)}>
-          {c ? c.name : ann.category || '已标注'}
-          {ann.difficulty > 0 ? ` ${ann.difficulty}⭐` : ''}
-        </button>
-      </Tooltip>
+      <span className="admin-annotation">
+        <Tooltip title={`在标注表（event_meta）中定位：${ek}`}>
+          <button type="button" className="admin-link" onClick={() => jumpTo('event_meta', ek)}>
+            <span className="admin-mono">{ek}</span>
+          </button>
+        </Tooltip>
+        {ann ? (
+          <Tooltip title={`已标注${cat ? ` · ${cat.name}` : ''}${ann.difficulty > 0 ? ` ${ann.difficulty}⭐` : ''}${ann.reflection ? '，有反思' : ''}`}>
+            <span className="admin-annotated">{cat?.name ?? '已标注'}</span>
+          </Tooltip>
+        ) : (
+          <span className="admin-null">未标注</span>
+        )}
+      </span>
     )
   }
 
@@ -613,8 +620,8 @@ export default function DataAdmin() {
       })
     }
     cols.push({
-      title: '标注',
-      width: 130,
+      title: '标注 event_key',
+      width: 230,
       align: 'center',
       render: (_v: unknown, r: RawRecord) => annotationCell(rawKeyOf(t, r.data ?? {})),
     })
