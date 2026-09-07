@@ -16,6 +16,7 @@ import {
 import {
   SortableContext,
   verticalListSortingStrategy,
+  rectSortingStrategy,
   arrayMove,
 } from '@dnd-kit/sortable'
 import { Badge, Tooltip, App as AntApp } from 'antd'
@@ -253,14 +254,12 @@ export default function KanbanBoard({ events, metas, columnOrder, setCategory, s
       return
     }
 
-    // 同容器：列内重排（真实让位动画）
+    // 同容器：列内重排（真实让位动画，含未分类池）
     setDropTarget(null)
     setDragItems((prev) => {
       if (!prev) return prev
       const fromKey = String(active.id)
       const fromItems = prev[activeContainer]
-      // 未分类池不支持池内排序，只允许拖入/拖出
-      if (activeContainer === UNASSIGNED_ID) return prev
       const oldIndex = fromItems.indexOf(fromKey)
       const newIndex = fromItems.indexOf(String(over.id))
       if (oldIndex < 0 || newIndex < 0 || oldIndex === newIndex) return prev
@@ -442,33 +441,34 @@ export default function KanbanBoard({ events, metas, columnOrder, setCategory, s
           </span>
           <Badge count={unassignedKeys.length} showZero color={UNASSIGNED_CATEGORY.color} />
         </div>
-        <div className="kanban-unassigned-hint">从下方拖拽卡片到上方对应分类中，完成归类</div>
-        {/* 未分类池仅可拖出/拖入，不参与池内排序：纯拖拽，避免 rectSortingStrategy 干扰上方列滚动 / 触发 React #185 */}
-        <div className="kanban-unassigned-body">
-          {unassignedKeys.map((key, i) => {
-            const ev = eventMap.get(key)
-            if (!ev) return null
-            return (
-              <Fragment key={ev.key}>
-                {dropTarget?.container === UNASSIGNED_ID && dropTarget.index === i && (
-                  <div className="kanban-drop-slot pool" />
-                )}
-                <div className="kanban-unassigned-card">
-                  <BoardCard
-                    event={ev}
-                    meta={metas[ev.key]}
-                    disabled={!editable}
-                    onClick={() => handleCardClick(ev.key)}
-                    sortable={false}
-                  />
-                </div>
-              </Fragment>
-            )
-          })}
-          {dropTarget?.container === UNASSIGNED_ID && dropTarget.index >= unassignedKeys.length && (
-            <div className="kanban-drop-slot pool" />
-          )}
-        </div>
+        <div className="kanban-unassigned-hint">从下方拖拽卡片到上方对应分类中，完成归类（池内可拖拽排序）</div>
+        {/* 未分类池支持池内拖拽排序；跨容器仍不改实时布局（占位槽提示落点，onDragEnd 提交） */}
+        <SortableContext items={unassignedKeys} strategy={rectSortingStrategy}>
+          <div className="kanban-unassigned-body">
+            {unassignedKeys.map((key, i) => {
+              const ev = eventMap.get(key)
+              if (!ev) return null
+              return (
+                <Fragment key={ev.key}>
+                  {dropTarget?.container === UNASSIGNED_ID && dropTarget.index === i && (
+                    <div className="kanban-drop-slot pool" />
+                  )}
+                  <div className="kanban-unassigned-card">
+                    <BoardCard
+                      event={ev}
+                      meta={metas[ev.key]}
+                      disabled={!editable}
+                      onClick={() => handleCardClick(ev.key)}
+                    />
+                  </div>
+                </Fragment>
+              )
+            })}
+            {dropTarget?.container === UNASSIGNED_ID && dropTarget.index >= unassignedKeys.length && (
+              <div className="kanban-drop-slot pool" />
+            )}
+          </div>
+        </SortableContext>
       </UnassignedShell>
 
       <DragOverlay>
