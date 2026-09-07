@@ -278,13 +278,18 @@ export default function KanbanBoard({ events, metas, columnOrder, setCategory, s
     const overCol = over ? findContainer(over.id) : null
     const startCol = startColRef.current
     if (overCol && startCol && overCol !== startCol) {
+      // 跨容器：改分类 + 按拖拽占位位置插入目标列（而不是默认排到末尾）
       setCategory(fromId, overCol)
-    }
-    if (dragItems) {
-      if (overCol && dragItems[overCol]) saveColumnOrder(overCol, dragItems[overCol])
-      if (startCol && dragItems[startCol] && startCol !== overCol) {
-        saveColumnOrder(startCol, dragItems[startCol])
-      }
+      const targetKeys = (renderItems[overCol] ?? []).filter((k) => k !== fromId)
+      const insertAt = Math.max(
+        0,
+        Math.min(dropTarget?.container === overCol ? dropTarget.index : targetKeys.length, targetKeys.length),
+      )
+      targetKeys.splice(insertAt, 0, fromId)
+      saveColumnOrder(overCol, targetKeys)
+    } else if (dragItems && startCol && dragItems[startCol]) {
+      // 同容器重排（列内/池内）：dragItems 已实时更新，保存该容器顺序
+      saveColumnOrder(startCol, dragItems[startCol])
     }
     setActiveId(null)
     setDragItems(null)
