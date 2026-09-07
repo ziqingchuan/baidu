@@ -1,6 +1,83 @@
 {
-  "fetchedAt": "2026-09-04T05:57:20.212Z",
+  "fetchedAt": "2026-09-07T06:36:57.079Z",
   "reviews": [
+    {
+      "number": 122421020,
+      "project": "baidu/BunnyDo/bunnydo-frontend",
+      "branch": "master",
+      "subject": "bunnydo-55 [Story] 【侧边栏】Handoff 唤起 Codex 改用如流 JSSDK 吊起系统浏览器",
+      "status": "MERGED",
+      "insertions": 87,
+      "deletions": 27,
+      "updated": "2026-09-07 11:26:21",
+      "revision": "442425971eb660950bfcca189e5fa07d2dfc3df7"
+    },
+    {
+      "number": 122420940,
+      "project": "baidu/BunnyDo/bunnydo-frontend",
+      "branch": "master",
+      "subject": "bunnydo-54 [Story] 【侧边栏】Handoff 唤起 Codex 改用如流 JSSDK 吊起系统浏览器 ",
+      "status": "ABANDONED",
+      "insertions": 75,
+      "deletions": 14,
+      "updated": "2026-09-07 11:09:05",
+      "revision": "4f22afab2b06a3118684687481408615d1b00088"
+    },
+    {
+      "number": 122411465,
+      "project": "baidu/BunnyDo/bunnydo-frontend",
+      "branch": "master",
+      "subject": "bunnydo-54 [Story] 【侧边栏】Handoff 唤起 Codex 改走中转页绕过宿主拦截",
+      "status": "MERGED",
+      "insertions": 165,
+      "deletions": 54,
+      "updated": "2026-09-04 18:20:02",
+      "revision": "aba48bb97c72763a827f206df14f61e19e805e02"
+    },
+    {
+      "number": 122410238,
+      "project": "baidu/BunnyDo/bunnydo-frontend",
+      "branch": "master",
+      "subject": "bunnydo-54 [Story] 【侧边栏】修复唤起codex弹窗失效问题",
+      "status": "MERGED",
+      "insertions": 95,
+      "deletions": 17,
+      "updated": "2026-09-04 17:34:00",
+      "revision": "2ffaf788811220e5cfa21697530d2f49ce6d5390"
+    },
+    {
+      "number": 122406216,
+      "project": "baidu/BunnyDo/bunnydo-frontend",
+      "branch": "master",
+      "subject": "bunnydo-53 [Story] 【侧边栏】重点关注模块支持手动更新，筛选与忽略",
+      "status": "MERGED",
+      "insertions": 189,
+      "deletions": 91,
+      "updated": "2026-09-04 15:59:35",
+      "revision": "59b0139f37cf0f52168915c325ccfa3dca7c53c3"
+    },
+    {
+      "number": 122405027,
+      "project": "baidu/BunnyDo/bunnydo-frontend",
+      "branch": "master",
+      "subject": "bunnydo-52 [Story] 【侧边栏】群总结支持自定义配置",
+      "status": "MERGED",
+      "insertions": 228,
+      "deletions": 18,
+      "updated": "2026-09-04 15:51:23",
+      "revision": "d671cfc9c13f5a4ba0777f37e88096caa2361379"
+    },
+    {
+      "number": 122404552,
+      "project": "baidu/BunnyDo/bunnydo-frontend",
+      "branch": "master",
+      "subject": "bunnydo-51 [Story] 【侧边栏】群总结增加关键节点",
+      "status": "MERGED",
+      "insertions": 130,
+      "deletions": 42,
+      "updated": "2026-09-04 15:18:06",
+      "revision": "e351114c6a8e340ac5983d87bd951aeb9375b1c5"
+    },
     {
       "number": 122380743,
       "project": "baidu/personal-code/self-kanban",
@@ -1893,46 +1970,101 @@
   "cards": [
     {
       "space": "bunnydo",
+      "sequence": 55,
+      "title": "【侧边栏】使用如流 JSSDK 吊起系统浏览器",
+      "status": "新建",
+      "type": "Story",
+      "assignee": "ziqingchuan",
+      "isFinished": false,
+      "lastModified": "2026-09-07 11:10:05",
+      "parent": "再入江湖之 init"
+    },
+    {
+      "space": "bunnydo",
+      "sequence": 54,
+      "title": "【侧边栏】修复唤起codex弹窗失效问题",
+      "status": "新建",
+      "type": "Story",
+      "assignee": "ziqingchuan",
+      "isFinished": false,
+      "lastModified": "2026-09-04 17:28:28",
+      "parent": "再入江湖之 init"
+    },
+    {
+      "space": "bunnydo",
+      "sequence": 53,
+      "title": "【侧边栏】重点关注模块支持手动更新，筛选与忽略",
+      "status": "新建",
+      "type": "Story",
+      "assignee": "ziqingchuan",
+      "isFinished": false,
+      "lastModified": "2026-09-04 14:59:10",
+      "parent": "再入江湖之 init"
+    },
+    {
+      "space": "bunnydo",
+      "sequence": 52,
+      "title": "【侧边栏】群总结支持自定义配置",
+      "status": "新建",
+      "type": "Story",
+      "assignee": "ziqingchuan",
+      "isFinished": false,
+      "lastModified": "2026-09-04 14:58:15",
+      "parent": "再入江湖之 init"
+    },
+    {
+      "space": "bunnydo",
+      "sequence": 51,
+      "title": "【侧边栏】群总结增加关键节点",
+      "status": "新建",
+      "type": "Story",
+      "assignee": "ziqingchuan",
+      "isFinished": false,
+      "lastModified": "2026-09-04 14:49:38",
+      "parent": "再入江湖之 init"
+    },
+    {
+      "space": "bunnydo",
       "sequence": 44,
       "title": "【前端】tailwindcss v4降级为v3",
-      "status": "新建",
+      "status": "已完成",
       "type": "Story",
       "assignee": "ziqingchuan",
-      "isFinished": false,
-      "lastModified": "2026-09-02 20:08:55",
-      "parent": "再入江湖之 init"
-    },
-    {
-      "space": "bunnydo",
-      "sequence": 41,
-      "title": "【侧边栏】补全三个tab页面的功能设计",
-      "status": "新建",
-      "type": "Story",
-      "assignee": "ziqingchuan",
-      "isFinished": false,
-      "lastModified": "2026-09-01 20:05:51",
-      "parent": "再入江湖之 init"
-    },
-    {
-      "space": "bunnydo",
-      "sequence": 40,
-      "title": "【侧边栏】搭建Bunny资产相关页面",
-      "status": "新建",
-      "type": "Story",
-      "assignee": "ziqingchuan",
-      "isFinished": false,
-      "lastModified": "2026-09-01 16:56:52",
+      "isFinished": true,
+      "lastModified": "2026-09-04 14:48:24",
       "parent": "再入江湖之 init"
     },
     {
       "space": "bunnydo",
       "sequence": 39,
       "title": "【侧边栏】实现Bunny整理页面",
-      "status": "新建",
+      "status": "已完成",
       "type": "Story",
       "assignee": "ziqingchuan",
-      "isFinished": false,
-      "lastModified": "2026-09-01 16:02:45",
+      "isFinished": true,
+      "lastModified": "2026-09-04 14:48:07",
+      "parent": "再入江湖之 init"
+    },
+    {
+      "space": "bunnydo",
+      "sequence": 40,
+      "title": "【侧边栏】搭建Bunny资产相关页面",
+      "status": "已完成",
+      "type": "Story",
+      "assignee": "ziqingchuan",
+      "isFinished": true,
+      "lastModified": "2026-09-04 14:47:57",
+      "parent": "再入江湖之 init"
+    },
+    {
+      "space": "bunnydo",
+      "sequence": 41,
+      "title": "【侧边栏】补全三个tab页面的功能设计",
+      "status": "已完成",
+      "type": "Story",
+      "assignee": "ziqingchuan",
+      "isFinished": true,
+      "lastModified": "2026-09-04 14:47:49",
       "parent": "再入江湖之 init"
     },
     {
