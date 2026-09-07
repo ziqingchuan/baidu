@@ -567,7 +567,13 @@ export default function DataAdmin() {
     fallback?: string
   }
 
-  const rawColumns = (t: 'reviews' | 'commits' | 'cards', keyFields: RawField[], contentKey?: string): TableProps<RawRecord>['columns'] => {
+  const rawColumns = (
+    t: 'reviews' | 'commits' | 'cards',
+    keyFields: RawField[],
+    contentKey?: string,
+    contentWidth?: number,
+    annotationWidth = 230,
+  ): TableProps<RawRecord>['columns'] => {
     const cols: NonNullable<TableProps<RawRecord>['columns']> = [
       {
         title: '序号',
@@ -611,6 +617,7 @@ export default function DataAdmin() {
       cols.push({
         title: '内容摘要',
         dataIndex: ['data', contentKey],
+        width: contentWidth,
         ellipsis: true,
         render: (v: unknown) => (
           <Tooltip title={String(v ?? '')} placement="topLeft">
@@ -621,7 +628,7 @@ export default function DataAdmin() {
     }
     cols.push({
       title: '标注 event_key',
-      width: 230,
+      width: annotationWidth,
       align: 'center',
       render: (_v: unknown, r: RawRecord) => annotationCell(rawKeyOf(t, r.data ?? {})),
     })
@@ -645,6 +652,8 @@ export default function DataAdmin() {
       { title: '作者', key: 'author', width: 100, kind: 'tag', fallback: 'geekblue' },
     ],
     'subject',
+    220,
+    320,
   )
   const cardsColumns = rawColumns(
     'cards',
