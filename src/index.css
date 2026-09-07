@@ -359,7 +359,7 @@ body {
 
 /* 拖拽落点占位槽（跨容器拖拽时显示，只做视觉占位、不改真实布局） */
 .kanban-drop-slot {
-  height: 44px;
+  height: 100px;
   flex-shrink: 0;
   border-radius: var(--radius-md);
   border: 1.5px dashed rgba(122, 167, 240, 0.6);
@@ -367,7 +367,7 @@ body {
 }
 .kanban-unassigned-body .kanban-drop-slot.pool {
   width: 260px;
-  height: 70px;
+  height: 100px;
 }
 
 /* ===== 任务卡片 ===== */
@@ -801,6 +801,16 @@ body {
   font-size: 12px;
 }
 .admin-arr { color: #7aa7f0; font-size: 12px; }
+.admin-link {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-size: 12px;
+  color: #6b8fe8;
+  cursor: pointer;
+  text-align: left;
+}
+.admin-link:hover { text-decoration: underline; }
 .admin-diff { color: #e8849a; font-size: 12px; font-weight: 600; }
 .admin-like { color: #e87a9a; font-size: 12px; font-weight: 600; }
 .admin-mock-tip {

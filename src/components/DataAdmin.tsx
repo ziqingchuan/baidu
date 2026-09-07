@@ -164,12 +164,21 @@ function mockOrders(): RawRecord[] {
 }
 const MOCK_ORDERS: RawRecord[] = mockOrders()
 
-/** 记录里所有可检索文本（id + data 序列化），用于搜索过滤 */
-function recordSearchText(r: RawRecord): string {
+/** 由原始行推导 event_key（与 event_meta.event_key 联动） */
+function rawKeyOf(t: 'reviews' | 'commits' | 'cards', d: Record<string, any>): string {
+  if (t === 'reviews') return `review:${d.number}`
+  if (t === 'commits') return `commit:${d.commitId}`
+  return `card:${d.space}-${d.sequence}`
+}
+
+/** 记录里所有可检索文本（id + 推导 key + data 序列化），用于搜索过滤 */
+function recordSearchText(t: TableName, r: RawRecord): string {
+  const d = r.data ?? {}
+  const derived = t === 'reviews' || t === 'commits' || t === 'cards' ? rawKeyOf(t, d) : ''
   try {
-    return `${r.id} ${JSON.stringify(r.data ?? {})}`.toLowerCase()
+    return `${r.id} ${derived} ${JSON.stringify(d)}`.toLowerCase()
   } catch {
-    return String(r.id ?? '').toLowerCase()
+    return `${r.id} ${derived}`.toLowerCase()
   }
 }
 
@@ -190,6 +199,8 @@ export default function DataAdmin() {
   // 受控分页：切表/刷新/搜索都保持当前页与每页条数
   const [current, setCurrent] = useState(1)
   const [pageSize, setPageSize] = useState(20)
+  // 标注索引：event_key -> {category, difficulty, reflection}，供原始表显示标注状态
+  const [annotationIndex, setAnnotationIndex] = useState<Map<string, { category: string; difficulty: number; reflection: string }>>(new Map())
 
   /** 脚本原始数据（reviews/commits/cards）转成 RawRecord 统一结构，id 用内置序号 */
   const rawRows = useMemo<Record<'reviews' | 'commits' | 'cards', RawRecord[]>>(() => {
@@ -200,6 +211,15 @@ export default function DataAdmin() {
       commits: withIdx(dash.data.commits, 'commit'),
       cards: withIdx(dash.data.cards, 'card'),
     }
+  }, [dash.data])
+
+  /** 原始数据索引：event_key -> {table, label, title}，供 event_meta 联动到原始记录 */
+  const rawIndex = useMemo(() => {
+    const m = new Map<string, { table: 'reviews' | 'commits' | 'cards'; label: string; title: string }>()
+    for (const r of dash.data.reviews) m.set(`review:${r.number}`, { table: 'reviews', label: `CR #${r.number}`, title: r.subject })
+    for (const c of dash.data.commits) m.set(`commit:${c.commitId}`, { table: 'commits', label: `提交 ${c.commitId.slice(0, 8)}`, title: c.subject })
+    for (const c of dash.data.cards) m.set(`card:${c.space}-${c.sequence}`, { table: 'cards', label: `卡片 ${c.space}-${c.sequence}`, title: c.title })
+    return m
   }, [dash.data])
 
   // 请求序号：切表/刷新时旧请求返回后不覆盖当前表数据（避免竞态）
@@ -236,12 +256,32 @@ export default function DataAdmin() {
     void load()
   }, [table, load])
 
+  // 加载标注索引（云端 event_meta），供原始表显示标注状态
+  useEffect(() => {
+    if (!isSupabaseReady()) return
+    loadAllRawRecords('event_meta')
+      .then((rows) => {
+        const m = new Map<string, { category: string; difficulty: number; reflection: string }>()
+        for (const r of rows) {
+          const ek = r.data?.event_key
+          if (!ek) continue
+          m.set(ek, {
+            category: String(r.data?.category ?? ''),
+            difficulty: Number(r.data?.difficulty) || 0,
+            reflection: String(r.data?.reflection ?? ''),
+          })
+        }
+        setAnnotationIndex(m)
+      })
+      .catch(() => {})
+  }, [])
+
   // 搜索过滤：对 key / id / data 内容检索
   const filtered = useMemo(() => {
     const kw = keyword.trim().toLowerCase()
     if (!kw) return records
-    return records.filter((r) => recordSearchText(r).includes(kw))
-  }, [records, keyword])
+    return records.filter((r) => recordSearchText(table, r).includes(kw))
+  }, [records, keyword, table])
 
   // 切换表/搜索时回到第一页
   useEffect(() => {
@@ -333,6 +373,28 @@ export default function DataAdmin() {
     }
   }
 
+  // ---------- 联动跳转与标注单元格 ----------
+  /** 跳转到指定表并搜索定位到对应记录 */
+  const jumpTo = (t: TableName, key: string) => {
+    setTable(t)
+    setKeyword(key)
+  }
+
+  /** 标注单元格：有标注显示分类/难度并跳回 event_meta，无标注灰色提示 */
+  const annotationCell = (ek: string): React.ReactNode => {
+    const ann = annotationIndex.get(ek)
+    if (!ann) return <span className="admin-null">未标注</span>
+    const c = categoryById(ann.category as CategoryId)
+    return (
+      <Tooltip title={ann.reflection ? `已标注，有反思：${ann.reflection.slice(0, 30)}` : '已标注，点击查看标注详情'}>
+        <button type="button" className="admin-link" onClick={() => jumpTo('event_meta', ek)}>
+          {c ? c.name : ann.category || '已标注'}
+          {ann.difficulty > 0 ? ` ${ann.difficulty}⭐` : ''}
+        </button>
+      </Tooltip>
+    )
+  }
+
   // ---------- event_meta 列（反思窄、难度纯数字、event_key 无标签） ----------
   const eventColumns: TableProps<RawRecord>['columns'] = [
     {
@@ -352,6 +414,22 @@ export default function DataAdmin() {
           <span className="admin-mono">{String(v ?? '') || <span className="admin-null">（空）</span>}</span>
         </Tooltip>
       ),
+    },
+    {
+      title: '关联原始数据',
+      width: 230,
+      render: (_v: unknown, r: RawRecord) => {
+        const ek = String(r.data?.event_key ?? '')
+        const hit = ek ? rawIndex.get(ek) : undefined
+        if (!hit) return <span className="admin-null">无对应</span>
+        return (
+          <Tooltip title={hit.title} placement="topLeft">
+            <button type="button" className="admin-link" onClick={() => jumpTo(hit.table, ek)}>
+              {hit.label}
+            </button>
+          </Tooltip>
+        )
+      },
     },
     {
       title: '分类',
@@ -482,7 +560,7 @@ export default function DataAdmin() {
     fallback?: string
   }
 
-  const rawColumns = (keyFields: RawField[], contentKey?: string): TableProps<RawRecord>['columns'] => {
+  const rawColumns = (t: 'reviews' | 'commits' | 'cards', keyFields: RawField[], contentKey?: string): TableProps<RawRecord>['columns'] => {
     const cols: NonNullable<TableProps<RawRecord>['columns']> = [
       {
         title: '序号',
@@ -534,11 +612,18 @@ export default function DataAdmin() {
         ),
       })
     }
+    cols.push({
+      title: '标注',
+      width: 130,
+      align: 'center',
+      render: (_v: unknown, r: RawRecord) => annotationCell(rawKeyOf(t, r.data ?? {})),
+    })
     return cols
   }
 
   /** 各原始数据表的列定义 */
   const reviewsColumns = rawColumns(
+    'reviews',
     [
       { title: 'CR 编号', key: 'number', width: 110, kind: 'number' },
       { title: '代码库', key: 'project', width: 220 },
@@ -547,6 +632,7 @@ export default function DataAdmin() {
     'subject',
   )
   const commitsColumns = rawColumns(
+    'commits',
     [
       { title: 'commitId', key: 'commitId', width: 250 },
       { title: '作者', key: 'author', width: 100, kind: 'tag', fallback: 'geekblue' },
@@ -554,6 +640,7 @@ export default function DataAdmin() {
     'subject',
   )
   const cardsColumns = rawColumns(
+    'cards',
     [
       { title: '空间', key: 'space', width: 110, kind: 'tag', fallback: 'purple' },
       { title: '卡片号', key: 'sequence', width: 80, kind: 'number' },
