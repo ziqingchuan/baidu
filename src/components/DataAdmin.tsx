@@ -222,6 +222,13 @@ export default function DataAdmin() {
     return m
   }, [dash.data])
 
+  /** 事件标题索引：event_key -> title，供列顺序表的任务列表展示可读标题 */
+  const titleMap = useMemo(() => {
+    const m = new Map<string, string>()
+    for (const e of dash.events) m.set(e.key, e.title)
+    return m
+  }, [dash.events])
+
   // 请求序号：切表/刷新时旧请求返回后不覆盖当前表数据（避免竞态）
   const loadSeqRef = useRef(0)
 
@@ -531,13 +538,49 @@ export default function DataAdmin() {
       },
     },
     {
-      title: '列内任务数',
+      title: '任务数',
       dataIndex: ['data', 'keys'],
-      width: 120,
+      width: 80,
       align: 'center',
       render: (_v: unknown, r: RawRecord) => {
         const arr = r.data?.keys as unknown[] | undefined
-        return arr ? <span>{arr.length} 项</span> : <span className="admin-null">（空）</span>
+        return arr ? <span className="admin-mono">{arr.length} 项</span> : <span className="admin-null">（空）</span>
+      },
+    },
+    {
+      title: '任务列表（按序）',
+      dataIndex: ['data', 'keys'],
+      render: (_v: unknown, r: RawRecord) => {
+        const keys = (r.data?.keys as unknown[]) ?? []
+        if (!keys.length) return <span className="admin-null">（空）</span>
+        const titles = keys.map((k) => titleMap.get(String(k)) ?? String(k))
+        const SHOW = 5
+        const visible = titles.slice(0, SHOW)
+        const rest = titles.slice(SHOW)
+        return (
+          <div className="admin-keys">
+            {visible.map((t, i) => (
+              <Tag key={i} color="default" style={{ fontSize: 11, marginInlineEnd: 0 }}>
+                {t}
+              </Tag>
+            ))}
+            {rest.length > 0 && (
+              <Tooltip
+                title={
+                  <div className="admin-keys-tip">
+                    {titles.map((t, i) => (
+                      <div key={i}>
+                        {i + 1}. {t}
+                      </div>
+                    ))}
+                  </div>
+                }
+              >
+                <span className="admin-more">+{rest.length}</span>
+              </Tooltip>
+            )}
+          </div>
+        )
       },
     },
     {
@@ -545,7 +588,14 @@ export default function DataAdmin() {
       dataIndex: ['data', 'updated_at'],
       width: 190,
       align: 'center',
-      render: (v: unknown) => <span className="admin-mono">{String(v ?? '') || '（空）'}</span>,
+      render: (v: unknown) => {
+        const t = String(v ?? '')
+        return (
+          <Tooltip title={`${t}（距今 ${ago(t)}）`}>
+            <span className="admin-mono">{t || '（空）'}</span>
+          </Tooltip>
+        )
+      },
     },
   ]
 

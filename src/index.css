@@ -826,6 +826,35 @@ body {
   vertical-align: middle;
 }
 .admin-annotated { font-size: 11px; color: #67b26f; }
+.admin-keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  align-items: center;
+  min-width: 420px;
+  padding: 2px 0;
+}
+.admin-keys .ant-tag {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-inline-end: 0;
+}
+.admin-more {
+  color: #6b8fe8;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.admin-more:hover { text-decoration: underline; }
+.admin-keys-tip {
+  max-height: 320px;
+  overflow-y: auto;
+  font-size: 12px;
+  line-height: 1.8;
+  max-width: 420px;
+}
 .admin-diff { color: #e8849a; font-size: 12px; font-weight: 600; }
 .admin-like { color: #e87a9a; font-size: 12px; font-weight: 600; }
 .admin-mock-tip {
