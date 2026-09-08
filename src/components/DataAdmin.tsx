@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Table, Tag, Tooltip, App as AntApp, Segmented, Input, Modal, Checkbox } from 'antd'
+import { Table, Tag, Tooltip, App as AntApp, Segmented, Input, Modal, Checkbox, Popconfirm } from 'antd'
 import type { TableProps } from 'antd'
 import { DownloadOutlined } from '@ant-design/icons'
 import * as XLSX from 'xlsx'
-import { isSupabaseReady, loadAllRawRecords } from '../lib/supabaseData'
+import { isSupabaseReady, loadAllRawRecords, deleteEventMetaById } from '../lib/supabaseData'
 import { categoryById, type CategoryId } from '../lib/categories'
 import { businessById, type BusinessId } from '../lib/business'
 import { useDashboardData } from '../lib/useDashboardData'
@@ -380,6 +380,35 @@ export default function DataAdmin() {
     setKeyword(key)
   }
 
+  /** 删除一条标注记录（云端硬删除，带确认） */
+  const handleDeleteMeta = async (r: RawRecord) => {
+    const id = r.id
+    const ek = String(r.data?.event_key ?? '')
+    const removeLocal = () => {
+      setRecords((prev) => prev.filter((x) => x.id !== id))
+      if (ek) {
+        setAnnotationIndex((prev) => {
+          const next = new Map(prev)
+          next.delete(ek)
+          return next
+        })
+      }
+    }
+    if (!isSupabaseReady()) {
+      removeLocal()
+      message.info('未配置 Supabase，仅本地移除')
+      return
+    }
+    try {
+      await deleteEventMetaById(id)
+      removeLocal()
+      message.success('已删除该标注记录')
+    } catch (e) {
+      console.warn('[supabase] 删除失败:', e)
+      message.error('删除失败，请查看控制台')
+    }
+  }
+
   /** 标注单元格：显示该行对应的 event_key（即标注表里的键），点击跳回 event_meta；附标注状态 */
   const annotationCell = (ek: string): React.ReactNode => {
     const ann = annotationIndex.get(ek)
@@ -510,6 +539,24 @@ export default function DataAdmin() {
         const like = Number(r.data?.like_count) || 0
         return like > 0 ? <span className="admin-like">♥ {like}</span> : <span className="admin-null">0</span>
       },
+    },
+    {
+      title: '操作',
+      width: 90,
+      fixed: 'right',
+      align: 'center',
+      render: (_v: unknown, r: RawRecord) => (
+        <Popconfirm
+          title="删除这条标注记录？"
+          description="将硬删除云端数据，不可恢复"
+          okText="删除"
+          cancelText="取消"
+          okButtonProps={{ danger: true }}
+          onConfirm={() => handleDeleteMeta(r)}
+        >
+          <button type="button" className="admin-delete">删除</button>
+        </Popconfirm>
+      ),
     },
   ]
 

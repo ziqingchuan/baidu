@@ -826,6 +826,17 @@ body {
   vertical-align: middle;
 }
 .admin-annotated { font-size: 11px; color: #67b26f; }
+.admin-delete {
+  border: 1px solid rgba(232, 139, 124, 0.4);
+  background: rgba(232, 139, 124, 0.08);
+  color: #e88b7c;
+  border-radius: 6px;
+  font-size: 12px;
+  padding: 2px 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.admin-delete:hover { background: rgba(232, 139, 124, 0.18); }
 .admin-key-cell {
   max-width: 100%;
   overflow: hidden;

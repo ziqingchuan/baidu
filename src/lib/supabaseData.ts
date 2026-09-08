@@ -135,6 +135,16 @@ export async function deleteMeta(eventKey: string): Promise<void> {
   invalidateCache()
 }
 
+/** 硬删除一条标注记录（按行 id，不可恢复），供数据管理后台使用 */
+export async function deleteEventMetaById(id: number | string): Promise<void> {
+  const res = await fetch(`${rest('event_meta')}?id=eq.${encodeURIComponent(String(id))}`, {
+    method: 'DELETE',
+    headers: { ...headers(), Prefer: 'return=minimal' },
+  })
+  if (!res.ok) throw new Error(`Supabase deleteEventMetaById ${res.status}`)
+  invalidateCache()
+}
+
 /** 拉取全部列顺序（category -> keys）；1 小时内命中缓存则不请求网络 */
 export async function loadAllOrders(): Promise<Partial<Record<CategoryId, string[]>>> {
   const cached = readCache()
