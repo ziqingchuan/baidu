@@ -98,7 +98,7 @@ const CARD_TYPE_COLORS: Record<string, string> = {
 
 // ---------- 本地 mock 数据（未配置 Supabase 时用于调试 UI/交互） ----------
 const MOCK_CATEGORIES: CategoryId[] = ['feature', 'ux', 'efficiency', 'bugfix', 'engineering']
-const MOCK_BUSINESSES: BusinessId[] = ['bunnydo', 'dodo', 'comate', 'ai-internal', 'other']
+const MOCK_BUSINESSES: BusinessId[] = ['bunnydo', 'dodo', 'comate', 'ai-internal']
 const MOCK_AWARDS = ['', '', '', '', '', 'gold', 'silver', 'copper']
 const MOCK_KEYS_POOL = [
   'card:bunnydo-33',

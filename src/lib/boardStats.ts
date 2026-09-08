@@ -107,11 +107,11 @@ export function buildBoardStats(events: EventItem[], metas: Record<string, Event
     ? Math.round((scoredEntries.reduce((a, [, m]) => a + m.difficulty, 0) / scoredEntries.length) * 10) / 10
     : 0
 
-  // 覆盖业务数：生效业务（手动覆盖优先，否则事件自动推断值）去重；「其他」不计入
+  // 覆盖业务数：生效业务（手动覆盖优先，否则事件自动推断值）去重
   const bizSet = new Set<string>()
   for (const e of events) {
     const biz = metas[e.key]?.business ?? e.business
-    if (biz && biz !== 'other') bizSet.add(biz)
+    if (biz) bizSet.add(biz)
   }
 
   // 代码变更总量

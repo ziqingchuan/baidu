@@ -5,14 +5,13 @@ export interface Business {
   color: string
 }
 
-export type BusinessId = 'dodo' | 'bunnydo' | 'comate' | 'ai-internal' | 'other'
+export type BusinessId = 'dodo' | 'bunnydo' | 'comate' | 'ai-internal'
 
 export const BUSINESSES: Business[] = [
   { id: 'dodo', name: 'dodo客户端', color: '#7aa7f0' },
   { id: 'bunnydo', name: 'BunnyDo', color: '#a78bfa' },
   { id: 'comate', name: 'Comate', color: '#6ccfcf' },
   { id: 'ai-internal', name: 'AI内化', color: '#f0b47e' },
-  { id: 'other', name: '其他', color: '#9aa2b1' },
 ]
 
 export function businessById(id: BusinessId | undefined): Business | undefined {
