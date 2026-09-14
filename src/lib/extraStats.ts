@@ -125,7 +125,8 @@ export function buildExtraStats(events: EventItem[], metas: Record<string, Event
   // 周节奏（周一~周日）
   const weekdayCounts = new Array(7).fill(0)
   for (const e of events) {
-    const wd = new Date(e.date).getDay()
+    // getDay()：0=周日 ~ 6=周六；转为周一~周日索引（周一=0 ... 周日=6），与雷达图标签对齐
+    const wd = (new Date(e.date).getDay() + 6) % 7
     weekdayCounts[wd]++
   }
 
