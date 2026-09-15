@@ -1,6 +1,149 @@
 {
-  "fetchedAt": "2026-09-07T06:36:57.079Z",
+  "fetchedAt": "2026-09-15T06:47:30.224Z",
   "reviews": [
+    {
+      "number": 122544021,
+      "project": "baidu/BunnyDo/bunnydo-frontend",
+      "branch": "master",
+      "subject": "bunnydo-99 入口弹窗对齐 getInitData 新字段：只认 iconId（删 menuId 兜底）+ 弹窗展示原始 JSON + 按钮横向占满",
+      "status": "OPEN",
+      "insertions": 12,
+      "deletions": 6,
+      "updated": "2026-09-15 14:27:35",
+      "revision": "7033cd132296514f94ecbcd03572efdefb38a5a9"
+    },
+    {
+      "number": 122529122,
+      "project": "baidu/BunnyDo/bunnydo-frontend",
+      "branch": "master",
+      "subject": "bunnydo-97 群聊右侧按钮检测自动拉机器人进群：bot-membership 查询 + addGroupRobot + 不在群门禁",
+      "status": "MERGED",
+      "insertions": 1136,
+      "deletions": 7,
+      "updated": "2026-09-15 14:02:42",
+      "revision": "0ddb3c3c082b285468662d2ac649dcaa1d2ac399"
+    },
+    {
+      "number": 122527841,
+      "project": "baidu/BunnyDo/bunnydo-server",
+      "branch": "master",
+      "subject": "bunnydo-98 bot-membership 改用如流开放 API：/imRobot/detail 取机器人 imid + memberList 判在群，替换群历史服务启发式（修机器人被踢出门禁误放行）",
+      "status": "MERGED",
+      "insertions": 575,
+      "deletions": 159,
+      "updated": "2026-09-15 12:08:32",
+      "revision": "244d2c3b1b09800e99dbe513a75c29d6663b55a0"
+    },
+    {
+      "number": 122504121,
+      "project": "baidu/BunnyDo/bunnydo-frontend",
+      "branch": "master",
+      "subject": "bunnydo-91 关联链接显示中文标题：getTextLink 宿主解析 + mock 换真实 ku 链接",
+      "status": "MERGED",
+      "insertions": 255,
+      "deletions": 19,
+      "updated": "2026-09-11 17:27:43",
+      "revision": "e903cc8f0a0d53713c297630d5c37eaf973c7fce"
+    },
+    {
+      "number": 122487885,
+      "project": "baidu/BunnyDo/bunnydo-frontend",
+      "branch": "master",
+      "subject": "bunnydo-88 [Story] 【侧边栏】关注点三 tab 状态流转 + 整理页多轮微调",
+      "status": "MERGED",
+      "insertions": 1040,
+      "deletions": 595,
+      "updated": "2026-09-11 14:43:53",
+      "revision": "a125d29bf359fb5fa54b5c85dcb4e9120ee87bc3"
+    },
+    {
+      "number": 122489006,
+      "project": "baidu/BunnyDo/bunnydo-server",
+      "branch": "master",
+      "subject": "bunnydo-89 关注点三态 disposition 持久化：doing/later/done + summary 全量返回带状态",
+      "status": "OPEN",
+      "insertions": 71,
+      "deletions": 56,
+      "updated": "2026-09-10 16:55:31",
+      "revision": "7876094eb95c9933e64ac7ba2a345e07f5fd9f55"
+    },
+    {
+      "number": 122482433,
+      "project": "baidu/BunnyDo/bunnydo-frontend",
+      "branch": "master",
+      "subject": "bunnydo-88 [Story] 【侧边栏】关注点溯源消息点击跳转如流定位",
+      "status": "MERGED",
+      "insertions": 145,
+      "deletions": 10,
+      "updated": "2026-09-10 14:58:51",
+      "revision": "37f9c2015c340cd5f1dab0438a1fe6c7260e13f9"
+    },
+    {
+      "number": 122472037,
+      "project": "baidu/BunnyDo/bunnydo-frontend",
+      "branch": "master",
+      "subject": "bunnydo-85 [Story] 【侧边栏】修复关注点卡片 hover 按钮残留",
+      "status": "MERGED",
+      "insertions": 9,
+      "deletions": 9,
+      "updated": "2026-09-09 19:40:23",
+      "revision": "060dd482c72a73fa8aeaa1c40e85481a2dae3e61"
+    },
+    {
+      "number": 122467057,
+      "project": "baidu/BunnyDo/bunnydo-frontend",
+      "branch": "master",
+      "subject": "bunnydo-83 [Story] 【侧边栏】对话详情抽屉化重构与对话链路修复",
+      "status": "MERGED",
+      "insertions": 1579,
+      "deletions": 575,
+      "updated": "2026-09-09 16:27:13",
+      "revision": "c245d90228ffdf7eacc6dc27e78ecb3389a0a092"
+    },
+    {
+      "number": 122455823,
+      "project": "baidu/BunnyDo/bunnydo-frontend",
+      "branch": "master",
+      "subject": "bunnydo-82 [Story] 【侧边栏】0911初版功能补全与对齐",
+      "status": "MERGED",
+      "insertions": 1692,
+      "deletions": 1184,
+      "updated": "2026-09-09 14:04:52",
+      "revision": "daa482a3e0a47eb00782351207b46e7c736e4bc3"
+    },
+    {
+      "number": 122450360,
+      "project": "baidu/BunnyDo/bunnydo-frontend",
+      "branch": "master",
+      "subject": "bunnydo-75 [Story] 【侧边栏】如流侧边栏开发知识库 JSSDK 参考文档存档",
+      "status": "MERGED",
+      "insertions": 6252,
+      "deletions": 0,
+      "updated": "2026-09-08 19:41:25",
+      "revision": "0d3b0cd1e9e585e489e45e31d3674918323a6d0b"
+    },
+    {
+      "number": 122445212,
+      "project": "baidu/BunnyDo/bunnydo-frontend",
+      "branch": "master",
+      "subject": "bunnydo-74 [Story] 【侧边栏】对话详情独立路由 /chat 与后台流式常驻，取消兜底加固",
+      "status": "MERGED",
+      "insertions": 390,
+      "deletions": 226,
+      "updated": "2026-09-08 17:01:02",
+      "revision": "4044364db40e70fb7b8f7674da60f37c1b55dac5"
+    },
+    {
+      "number": 122430680,
+      "project": "baidu/BunnyDo/bunnydo-frontend",
+      "branch": "master",
+      "subject": "bunnydo-56 [Story] 【前端】UI 换为红橙配色",
+      "status": "MERGED",
+      "insertions": 226,
+      "deletions": 185,
+      "updated": "2026-09-07 17:58:39",
+      "revision": "d902885726c6fceecf6551864e58a8abf1eaa7f6"
+    },
     {
       "number": 122421020,
       "project": "baidu/BunnyDo/bunnydo-frontend",
@@ -1023,53 +1166,169 @@
       "deletions": 92,
       "updated": "2026-03-10 15:04:44",
       "revision": "4d103d3a974349bb6d47c092299845709830d17e"
-    },
-    {
-      "number": 119975756,
-      "project": "baidu/qac/ziqingchuan",
-      "branch": "master",
-      "subject": "完成QAC考试",
-      "status": "MERGED",
-      "insertions": 283,
-      "deletions": 1,
-      "updated": "2026-03-05 11:25:08",
-      "revision": "e5c135b0383bf502bc087580c90adbf8b7a5d73e"
-    },
-    {
-      "number": 119972060,
-      "project": "baidu/qualifiedcoder/ziqingchuan",
-      "branch": "feature-fcnap",
-      "subject": "修复页脚年份的错误",
-      "status": "MERGED",
-      "insertions": 1,
-      "deletions": 1,
-      "updated": "2026-03-04 20:13:20",
-      "revision": "4e20e926f08bb38a0a1668b01e9aec779b16d3d0"
-    },
-    {
-      "number": 119968313,
-      "project": "baidu/qualifiedcoder/ziqingchuan",
-      "branch": "master",
-      "subject": "Add 【用户名】",
-      "status": "MERGED",
-      "insertions": 633,
-      "deletions": 1,
-      "updated": "2026-03-04 19:51:46",
-      "revision": "f40ae185648a415329a34ff80708e99b7a7266e5"
-    },
-    {
-      "number": 119968320,
-      "project": "baidu/qualifiedcoder/ziqingchuan",
-      "branch": "master",
-      "subject": "确认合并",
-      "status": "ABANDONED",
-      "insertions": 632,
-      "deletions": 1,
-      "updated": "2026-03-04 19:35:29",
-      "revision": "9b98fd36d08563a26ceeff98e84a8eff1e600676"
     }
   ],
   "commits": [
+    {
+      "commitId": "0ddb3c3c082b285468662d2ac649dcaa1d2ac399",
+      "author": "ziqingchuan",
+      "commitTime": "2026-09-15 13:09:39",
+      "addLines": 235,
+      "deleteLines": 1,
+      "subject": "bunnydo-97 群聊右侧按钮检测自动拉机器人进群：bot-membership 查询 + addGroupRobot + 不在群门禁"
+    },
+    {
+      "commitId": "244d2c3b1b09800e99dbe513a75c29d6663b55a0",
+      "author": "ziqingchuan",
+      "commitTime": "2026-09-15 11:25:14",
+      "addLines": 556,
+      "deleteLines": 153,
+      "subject": "bunnydo-98 bot-membership 改用如流开放 API：/imRobot/detail 取机器人 imid + memberList 判在群，替换群历史服务启发式（修机器人被踢出门禁误放行）"
+    },
+    {
+      "commitId": "83faf1c549326338f32c43c1510b498751261f0a",
+      "author": "ziqingchuan",
+      "commitTime": "2026-09-14 15:20:25",
+      "addLines": 209,
+      "deleteLines": 0,
+      "subject": "bunnydo-94 当个事儿办入口联动：channel.getInitData 取入口数据 + 弹窗展示捕获数据"
+    },
+    {
+      "commitId": "2fa8c7580244dec9bbe7c6a15e1fe1d62e39ceed",
+      "author": "ziqingchuan",
+      "commitTime": "2026-09-14 11:18:51",
+      "addLines": 602,
+      "deleteLines": 6,
+      "subject": "bunnydo-93 对话结果一键插入如流输入框：md→Quill Delta + sendRichTextToChatInput + AI 气泡操作按钮"
+    },
+    {
+      "commitId": "e903cc8f0a0d53713c297630d5c37eaf973c7fce",
+      "author": "ziqingchuan",
+      "commitTime": "2026-09-11 16:33:49",
+      "addLines": 245,
+      "deleteLines": 19,
+      "subject": "bunnydo-91 关联链接显示中文标题：getTextLink 宿主解析 + mock 换真实 ku 链接"
+    },
+    {
+      "commitId": "a125d29bf359fb5fa54b5c85dcb4e9120ee87bc3",
+      "author": "ziqingchuan",
+      "commitTime": "2026-09-11 14:22:17",
+      "addLines": 1005,
+      "deleteLines": 589,
+      "subject": "bunnydo-88 [Story] 【侧边栏】关注点三 tab 状态流转 + 整理页多轮微调"
+    },
+    {
+      "commitId": "37f9c2015c340cd5f1dab0438a1fe6c7260e13f9",
+      "author": "ziqingchuan",
+      "commitTime": "2026-09-10 13:24:43",
+      "addLines": 140,
+      "deleteLines": 10,
+      "subject": "bunnydo-88 [Story] 【侧边栏】关注点溯源消息点击跳转如流定位"
+    },
+    {
+      "commitId": "060dd482c72a73fa8aeaa1c40e85481a2dae3e61",
+      "author": "ziqingchuan",
+      "commitTime": "2026-09-09 19:15:28",
+      "addLines": 9,
+      "deleteLines": 9,
+      "subject": "bunnydo-85 [Story] 【侧边栏】修复关注点卡片 hover 按钮残留"
+    },
+    {
+      "commitId": "c245d90228ffdf7eacc6dc27e78ecb3389a0a092",
+      "author": "ziqingchuan",
+      "commitTime": "2026-09-09 16:17:38",
+      "addLines": 96,
+      "deleteLines": 23,
+      "subject": "bunnydo-83 [Story] 【侧边栏】对话详情抽屉化重构与对话链路修复"
+    },
+    {
+      "commitId": "2e606217761d9daf6e5dcc42f493d275ba08c951",
+      "author": "ziqingchuan",
+      "commitTime": "2026-09-09 15:42:10",
+      "addLines": 1367,
+      "deleteLines": 537,
+      "subject": "bunnydo-83 [Story] 【侧边栏】对话详情抽屉化重构与对话链路修复"
+    },
+    {
+      "commitId": "daa482a3e0a47eb00782351207b46e7c736e4bc3",
+      "author": "ziqingchuan",
+      "commitTime": "2026-09-09 14:01:20",
+      "addLines": 1633,
+      "deleteLines": 1126,
+      "subject": "bunnydo-82 [Story] 【侧边栏】0911初版功能补全与对齐"
+    },
+    {
+      "commitId": "4044364db40e70fb7b8f7674da60f37c1b55dac5",
+      "author": "ziqingchuan",
+      "commitTime": "2026-09-08 16:45:02",
+      "addLines": 265,
+      "deleteLines": 118,
+      "subject": "bunnydo-74 [Story] 【侧边栏】对话详情独立路由 /chat 与后台流式常驻，取消兜底加固"
+    },
+    {
+      "commitId": "3a4189e0bd02c9436215a3503f0e7ff5b6d8d23f",
+      "author": "ziqingchuan",
+      "commitTime": "2026-09-08 16:26:41",
+      "addLines": 104,
+      "deleteLines": 100,
+      "subject": "bunnydo-57 【视觉】红橙配色ip形象替换"
+    },
+    {
+      "commitId": "d902885726c6fceecf6551864e58a8abf1eaa7f6",
+      "author": "ziqingchuan",
+      "commitTime": "2026-09-07 17:33:16",
+      "addLines": 224,
+      "deleteLines": 185,
+      "subject": "bunnydo-56 [Story] 【前端】UI 换为红橙配色"
+    },
+    {
+      "commitId": "442425971eb660950bfcca189e5fa07d2dfc3df7",
+      "author": "ziqingchuan",
+      "commitTime": "2026-09-07 11:12:06",
+      "addLines": 83,
+      "deleteLines": 27,
+      "subject": "bunnydo-55 [Story] 【侧边栏】Handoff 唤起 Codex 改用如流 JSSDK 吊起系统浏览器"
+    },
+    {
+      "commitId": "aba48bb97c72763a827f206df14f61e19e805e02",
+      "author": "ziqingchuan",
+      "commitTime": "2026-09-04 18:16:53",
+      "addLines": 147,
+      "deleteLines": 51,
+      "subject": "bunnydo-54 [Story] 【侧边栏】Handoff 唤起 Codex 改走中转页绕过宿主拦截"
+    },
+    {
+      "commitId": "2ffaf788811220e5cfa21697530d2f49ce6d5390",
+      "author": "ziqingchuan",
+      "commitTime": "2026-09-04 17:29:46",
+      "addLines": 86,
+      "deleteLines": 17,
+      "subject": "bunnydo-54 [Story] 【侧边栏】修复唤起codex弹窗失效问题"
+    },
+    {
+      "commitId": "59b0139f37cf0f52168915c325ccfa3dca7c53c3",
+      "author": "ziqingchuan",
+      "commitTime": "2026-09-04 15:57:05",
+      "addLines": 182,
+      "deleteLines": 89,
+      "subject": "bunnydo-53 [Story] 【侧边栏】重点关注模块支持手动更新，筛选与忽略"
+    },
+    {
+      "commitId": "d671cfc9c13f5a4ba0777f37e88096caa2361379",
+      "author": "ziqingchuan",
+      "commitTime": "2026-09-04 15:31:11",
+      "addLines": 214,
+      "deleteLines": 18,
+      "subject": "bunnydo-52 [Story] 【侧边栏】群总结支持自定义配置"
+    },
+    {
+      "commitId": "e351114c6a8e340ac5983d87bd951aeb9375b1c5",
+      "author": "ziqingchuan",
+      "commitTime": "2026-09-04 15:06:01",
+      "addLines": 126,
+      "deleteLines": 41,
+      "subject": "bunnydo-51 [Story] 【侧边栏】群总结增加关键节点"
+    },
     {
       "commitId": "4d94e9f4c79171f48cb180dc9919b13899e49e58",
       "author": "ziqingchuan",
@@ -1970,57 +2229,222 @@
   "cards": [
     {
       "space": "bunnydo",
-      "sequence": 55,
-      "title": "【侧边栏】使用如流 JSSDK 吊起系统浏览器",
+      "sequence": 99,
+      "title": "【侧边栏】配合如流SDK更新channel.getInitData 获取侧边栏初始化数据",
       "status": "新建",
       "type": "Story",
       "assignee": "ziqingchuan",
       "isFinished": false,
-      "lastModified": "2026-09-07 11:10:05",
+      "lastModified": "2026-09-15 14:22:53",
       "parent": "再入江湖之 init"
     },
     {
       "space": "bunnydo",
-      "sequence": 54,
-      "title": "【侧边栏】修复唤起codex弹窗失效问题",
-      "status": "新建",
+      "sequence": 91,
+      "title": "获取知识库文档md内容",
+      "status": "已完成",
       "type": "Story",
-      "assignee": "ziqingchuan",
-      "isFinished": false,
-      "lastModified": "2026-09-04 17:28:28",
+      "assignee": "yuanyahui",
+      "isFinished": true,
+      "lastModified": "2026-09-15 11:05:45",
       "parent": "再入江湖之 init"
     },
     {
       "space": "bunnydo",
-      "sequence": 53,
-      "title": "【侧边栏】重点关注模块支持手动更新，筛选与忽略",
-      "status": "新建",
+      "sequence": 93,
+      "title": "【侧边栏】对话结果一键插入如流输入框",
+      "status": "已完成",
       "type": "Story",
       "assignee": "ziqingchuan",
-      "isFinished": false,
-      "lastModified": "2026-09-04 14:59:10",
+      "isFinished": true,
+      "lastModified": "2026-09-15 11:05:36",
       "parent": "再入江湖之 init"
     },
     {
       "space": "bunnydo",
-      "sequence": 52,
-      "title": "【侧边栏】群总结支持自定义配置",
+      "sequence": 94,
+      "title": "【侧边栏】hover/多选消息「当个事儿办」 创建任务",
+      "status": "已完成",
+      "type": "Story",
+      "assignee": "ziqingchuan",
+      "isFinished": true,
+      "lastModified": "2026-09-15 11:05:26",
+      "parent": "再入江湖之 init"
+    },
+    {
+      "space": "bunnydo",
+      "sequence": 98,
+      "title": "【后端】新增接口获取robot_imid等机器人基本信息",
       "status": "新建",
       "type": "Story",
       "assignee": "ziqingchuan",
       "isFinished": false,
-      "lastModified": "2026-09-04 14:58:15",
+      "lastModified": "2026-09-15 11:05:07",
+      "parent": "再入江湖之 init"
+    },
+    {
+      "space": "bunnydo",
+      "sequence": 97,
+      "title": "【侧边栏】群聊右侧按钮检测自动拉机器人进群",
+      "status": "新建",
+      "type": "Story",
+      "assignee": "ziqingchuan",
+      "isFinished": false,
+      "lastModified": "2026-09-14 15:28:51",
+      "parent": "再入江湖之 init"
+    },
+    {
+      "space": "bunnydo",
+      "sequence": 89,
+      "title": "【侧边栏】补齐0911版本的新增功能",
+      "status": "已完成",
+      "type": "Story",
+      "assignee": "ziqingchuan",
+      "isFinished": true,
+      "lastModified": "2026-09-14 11:00:59",
+      "parent": "再入江湖之 init"
+    },
+    {
+      "space": "bunnydo",
+      "sequence": 88,
+      "title": "【侧边栏】支持点击锚定到群聊消息位置",
+      "status": "已完成",
+      "type": "Story",
+      "assignee": "ziqingchuan",
+      "isFinished": true,
+      "lastModified": "2026-09-10 16:19:18",
+      "parent": "再入江湖之 init"
+    },
+    {
+      "space": "bunnydo",
+      "sequence": 85,
+      "title": "【侧边栏】修复卡片hover的动画在侧边栏里的异常行为",
+      "status": "已完成",
+      "type": "Story",
+      "assignee": "ziqingchuan",
+      "isFinished": true,
+      "lastModified": "2026-09-10 13:44:11",
+      "parent": "再入江湖之 init"
+    },
+    {
+      "space": "bunnydo",
+      "sequence": 83,
+      "title": "【侧边栏】重构对话组件的设计并补充关键单测",
+      "status": "已完成",
+      "type": "Story",
+      "assignee": "ziqingchuan",
+      "isFinished": true,
+      "lastModified": "2026-09-10 13:44:04",
+      "parent": "再入江湖之 init"
+    },
+    {
+      "space": "bunnydo",
+      "sequence": 74,
+      "title": "【侧边栏】输入框相关逻辑bug修复",
+      "status": "已完成",
+      "type": "Story",
+      "assignee": "ziqingchuan",
+      "isFinished": true,
+      "lastModified": "2026-09-10 13:43:48",
+      "parent": "再入江湖之 init"
+    },
+    {
+      "space": "bunnydo",
+      "sequence": 75,
+      "title": "【文档】补充了如流开放API文档，方便agent参考",
+      "status": "已完成",
+      "type": "Story",
+      "assignee": "ziqingchuan",
+      "isFinished": true,
+      "lastModified": "2026-09-10 13:43:41",
+      "parent": "再入江湖之 init"
+    },
+    {
+      "space": "bunnydo",
+      "sequence": 82,
+      "title": "【侧边栏】0911初版功能补全与对齐",
+      "status": "已完成",
+      "type": "Story",
+      "assignee": "ziqingchuan",
+      "isFinished": true,
+      "lastModified": "2026-09-09 14:18:11",
+      "parent": "再入江湖之 init"
+    },
+    {
+      "space": "bunnydo",
+      "sequence": 57,
+      "title": "【视觉】红橙配色ip形象替换",
+      "status": "已完成",
+      "type": "Story",
+      "assignee": "ziqingchuan",
+      "isFinished": true,
+      "lastModified": "2026-09-08 21:40:45",
+      "parent": "再入江湖之 init"
+    },
+    {
+      "space": "bunnydo",
+      "sequence": 56,
+      "title": "【前端】UI 尝试换为红橙配色",
+      "status": "已完成",
+      "type": "Story",
+      "assignee": "ziqingchuan",
+      "isFinished": true,
+      "lastModified": "2026-09-08 21:40:38",
       "parent": "再入江湖之 init"
     },
     {
       "space": "bunnydo",
       "sequence": 51,
       "title": "【侧边栏】群总结增加关键节点",
-      "status": "新建",
+      "status": "已完成",
       "type": "Story",
       "assignee": "ziqingchuan",
-      "isFinished": false,
-      "lastModified": "2026-09-04 14:49:38",
+      "isFinished": true,
+      "lastModified": "2026-09-07 17:24:23",
+      "parent": "再入江湖之 init"
+    },
+    {
+      "space": "bunnydo",
+      "sequence": 52,
+      "title": "【侧边栏】群总结支持自定义配置",
+      "status": "已完成",
+      "type": "Story",
+      "assignee": "ziqingchuan",
+      "isFinished": true,
+      "lastModified": "2026-09-07 17:24:14",
+      "parent": "再入江湖之 init"
+    },
+    {
+      "space": "bunnydo",
+      "sequence": 53,
+      "title": "【侧边栏】重点关注模块支持手动更新，筛选与忽略",
+      "status": "已完成",
+      "type": "Story",
+      "assignee": "ziqingchuan",
+      "isFinished": true,
+      "lastModified": "2026-09-07 17:24:03",
+      "parent": "再入江湖之 init"
+    },
+    {
+      "space": "bunnydo",
+      "sequence": 54,
+      "title": "【侧边栏】修复唤起codex弹窗失效问题",
+      "status": "已完成",
+      "type": "Story",
+      "assignee": "ziqingchuan",
+      "isFinished": true,
+      "lastModified": "2026-09-07 17:23:55",
+      "parent": "再入江湖之 init"
+    },
+    {
+      "space": "bunnydo",
+      "sequence": 55,
+      "title": "【侧边栏】使用如流 JSSDK 吊起系统浏览器",
+      "status": "已完成",
+      "type": "Story",
+      "assignee": "ziqingchuan",
+      "isFinished": true,
+      "lastModified": "2026-09-07 17:23:46",
       "parent": "再入江湖之 init"
     },
     {

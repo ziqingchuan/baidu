@@ -23,6 +23,13 @@ function medalIcon(id: string): string {
 
 // ---------- 达成条件用到的统计工具 ----------
 
+/** 后端代码库（全栈转型成就判定）：在这些库里的产出视为「后端开发任务」。新增后端库时往这里加。 */
+const BACKEND_REPOS = ['bunnydo-server']
+
+function isBackendRepo(repo: string): boolean {
+  return BACKEND_REPOS.some((r) => repo.toLowerCase().includes(r))
+}
+
 /** 是否为工作日（周一~周五） */
 function isWorkday(dateStr: string): boolean {
   const d = new Date(dateStr)
@@ -135,7 +142,7 @@ export const ACHIEVEMENT_GROUPS: AchievementGroupDef[] = [
   { id: 'engineering', name: '工程攻坚', desc: '能扛高难度 / 复杂工程，会重构与工程化建设', ids: ['hard-1', 'hard-5', 'delete-5000', 'engineering-5'] },
   { id: 'quality', name: '质量保障', desc: '交付可靠，善于定位与修复问题', ids: ['bugfix-5', 'hard-bug-5'] },
   { id: 'outcome', name: '关键成果', desc: '做出被认可的核心产出', ids: ['first-gold', 'first-silver', 'first-copper', 'gold-3', 'silver-3', 'copper-3', 'awards-10', 'grand-slam'] },
-  { id: 'breadth', name: '广度深耕', desc: '技术视野广、业务理解深', ids: ['category-5', 'business-3', 'business-10'] },
+  { id: 'breadth', name: '广度深耕', desc: '技术视野广、业务理解深', ids: ['fullstack-1', 'category-5', 'business-3', 'business-10'] },
   { id: 'consistency', name: '持续高效', desc: '产出稳定持续、规模可观', ids: ['workday-5', 'month-full', 'quarters-4', 'day-5', 'tasks-50', 'tasks-100', 'lines-10000'] },
   { id: 'reflection', name: '复盘沉淀', desc: '善于总结反思、自我迭代', ids: ['reflection-10', 'reflection-deep'] },
 ]
@@ -282,6 +289,14 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   },
 
   // ---------- 广度深耕：技术视野广、业务理解深 ----------
+  {
+    id: 'fullstack-1',
+    name: '全栈入门',
+    desc: '完成了第 1 个后端开发任务，跨出全栈第一步。',
+    icon: medalIcon('fullstack-1'),
+    check: (e) => e.some((x) => isBackendRepo(x.repo)),
+    progress: (e) => ({ current: Math.min(e.filter((x) => isBackendRepo(x.repo)).length, 1), target: 1 }),
+  },
   {
     id: 'category-5',
     name: '全面探索',
