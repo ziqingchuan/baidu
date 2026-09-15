@@ -29,10 +29,8 @@ export interface ExtraStats {
   bizRepo: { biz: string; repo: string; count: number }[]
   /** 纯代码库聚合（按代码库分块，矩形大小 = 该库任务数） */
   repoCount: { repo: string; count: number }[]
-  /** 后端里程碑（全栈转型）：按时间排序的后端产出事件 */
-  backendMilestones: { date: string; title: string; merged: boolean; insertions: number; deletions: number }[]
-  /** 后端转型「下一站」未达成目标（任务数 / 代码行数） */
-  backendTargets: { label: string; current: number; target: number }[]
+  /** 后端产出（全栈转型）：代码量（累计新增行）与任务数，随筛选范围变化 */
+  backendStats: { insertions: number; tasks: number }
 }
 
 const STOP_WORDS = new Set([
@@ -166,24 +164,12 @@ export function buildExtraStats(events: EventItem[], metas: Record<string, Event
     .map(([repo, count]) => ({ repo, count }))
     .sort((a, b) => b.count - a.count)
 
-  // 后端里程碑（全栈转型）：后端库产出按时间排序，供「后端产出里程碑」图展示 0→1 叙事与下一站目标
-  const backendEvents = events
-    .filter((e) => isBackendRepo(e.repo))
-    .sort((a, b) => (a.date < b.date ? -1 : 1))
-  const backendMilestones = backendEvents.map((e) => ({
-    date: e.date.slice(0, 10),
-    title: e.title,
-    merged: e.status === 'MERGED',
-    insertions: e.insertions,
-    deletions: e.deletions,
-  }))
-  const backendTasks = backendEvents.length
-  const backendInsertions = backendEvents.reduce((a, e) => a + e.insertions, 0)
-  // 已达成的不再显示为「下一站」
-  const backendTargets = [
-    { label: '任务×5', current: backendTasks, target: 5 },
-    { label: '代码1000行', current: backendInsertions, target: 1000 },
-  ].filter((t) => t.current < t.target)
+  // 后端产出（全栈转型）：后端库的代码量与任务数，随筛选范围变化
+  const backendEvents = events.filter((e) => isBackendRepo(e.repo))
+  const backendStats = {
+    insertions: backendEvents.reduce((a, e) => a + e.insertions, 0),
+    tasks: backendEvents.length,
+  }
 
   return {
     year,
@@ -196,7 +182,6 @@ export function buildExtraStats(events: EventItem[], metas: Record<string, Event
     bizCategory,
     bizRepo,
     repoCount,
-    backendMilestones,
-    backendTargets,
+    backendStats,
   }
 }

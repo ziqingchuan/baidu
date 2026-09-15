@@ -437,99 +437,28 @@ function BizRepoTreemap({ extra }: { extra: ExtraStats }) {
   )
 }
 
-/** 后端产出里程碑（全栈转型）：已达成事件实心涟漪沿累计后端代码行爬升，空心虚线 = 「下一站」目标 */
-function BackendMilestone({ extra }: { extra: ExtraStats }) {
-  const { backendMilestones: ms, backendTargets: targets } = extra
-  // 累计后端新增行（成长曲线高度）
-  let cum = 0
-  const achieved = ms.map((m) => {
-    cum += m.insertions
-    return { m, y: cum }
-  })
-  const currentLines = cum
-  const axis = [...ms.map((m) => m.date.slice(5)), ...targets.map((t) => t.label)]
-  const option = {
-    ...chartBase,
-    tooltip: {
-      ...chartBase.tooltip,
-      trigger: 'item',
-      formatter: (p: any) => {
-        if (p.dataIndex < ms.length) {
-          const m = ms[p.dataIndex]
-          return `${m.date}<br/>${m.title}<br/>+${m.insertions} / -${m.deletions} 行 · ${m.merged ? '已合入' : '待合入'}`
-        }
-        const t = targets[p.dataIndex - ms.length]
-        return `${t.label}：${t.current} / ${t.target}`
-      },
-    },
-    grid: { ...chartBase.grid, top: 42, left: 52, right: 24, bottom: 40 },
-    xAxis: {
-      type: 'category',
-      data: axis,
-      axisLabel: { fontSize: 11, color: '#8a93a5', interval: 0 },
-      axisLine: { lineStyle: { color: 'rgba(120,135,165,0.2)' } },
-      axisTick: { show: false },
-    },
-    yAxis: {
-      type: 'value',
-      name: '累计后端新增行',
-      nameTextStyle: { fontSize: 11, color: '#8a93a5' },
-      axisLabel: { fontSize: 11, color: '#8a93a5' },
-      splitLine: { lineStyle: { color: 'rgba(120,135,165,0.12)' } },
-    },
-    series: [
-      // 成长线：连接已达成里程碑（累计行数）
-      {
-        type: 'line',
-        data: achieved.map((p) => p.y),
-        smooth: true,
-        symbol: 'none',
-        lineStyle: { color: '#a78bfa', width: 2 },
-        tooltip: { show: false },
-        z: 1,
-      },
-      // 已达成里程碑节点（涟漪 = 合入的）
-      {
-        type: 'effectScatter',
-        data: achieved.map((p) => [p.m.date.slice(5), p.y, p.m]),
-        symbolSize: 14,
-        rippleEffect: { scale: 2.4, brushType: 'stroke' },
-        itemStyle: { color: (p: any) => (p.data?.[2]?.merged ? '#a78bfa' : '#c5b3f5') },
-        label: {
-          show: true,
-          position: 'top',
-          formatter: (p: any) => `${p.value[0]} · +${p.value[2].insertions}`,
-          fontSize: 10,
-          color: '#8a93a5',
-        },
-        z: 3,
-      },
-      // 「下一站」未达成目标（空心虚线）
-      {
-        type: 'scatter',
-        data: targets.map((t) => [t.label, t.label === '代码1000行' ? t.target : currentLines]),
-        symbol: 'circle',
-        symbolSize: 14,
-        itemStyle: {
-          color: 'rgba(255,255,255,0.6)',
-          borderColor: '#c5b3f5',
-          borderWidth: 2,
-          borderDash: [5, 4],
-        },
-        label: {
-          show: true,
-          position: 'top',
-          formatter: (p: any) => `${targets[p.dataIndex].current}/${targets[p.dataIndex].target}`,
-          fontSize: 10,
-          color: '#a9b0bf',
-        },
-        z: 2,
-      },
-    ],
-  }
+/** 后端产出（全栈转型）：直观展示后端代码量与任务数 */
+function BackendStats({ extra }: { extra: ExtraStats }) {
+  const { insertions, tasks } = extra.backendStats
   return (
-    <Card size="small" title="后端产出里程碑 · 全栈转型" className="charts-card">
-      <ReactEChartsCore echarts={echarts} option={option} style={{ height: 240 }} notMerge />
+    <Card size="small" title="全栈转型 · 后端产出" className="charts-card">
+      <div style={{ display: 'flex', gap: 32, padding: '18px 8px', alignItems: 'center' }}>
+        <div style={{ flex: 1, textAlign: 'center' }}>
+          <div style={{ fontSize: 12, color: '#8a93a5', marginBottom: 6 }}>后端代码量（新增）</div>
+          <div style={{ fontSize: 34, fontWeight: 700, color: '#a78bfa', lineHeight: 1.3 }}>
+            {insertions.toLocaleString()}
+            <span style={{ fontSize: 14, fontWeight: 400, color: '#8a93a5', marginLeft: 6 }}>行</span>
+          </div>
+        </div>
+        <div style={{ width: 1, height: 44, background: 'rgba(120,135,165,0.15)' }} />
+        <div style={{ flex: 1, textAlign: 'center' }}>
+          <div style={{ fontSize: 12, color: '#8a93a5', marginBottom: 6 }}>后端任务数</div>
+          <div style={{ fontSize: 34, fontWeight: 700, color: '#a78bfa', lineHeight: 1.3 }}>
+            {tasks}
+            <span style={{ fontSize: 14, fontWeight: 400, color: '#8a93a5', marginLeft: 6 }}>个</span>
+          </div>
+        </div>
+      </div>
     </Card>
   )
 }
@@ -589,11 +518,11 @@ export default function ChartsSection({
           <CodeVolume stats={stats} />
         </Col>
       </Row>
-      {/* 全栈转型（放最底）：后端产出里程碑（当前筛选范围内有后端产出时展示） */}
-      {extra.backendMilestones.length > 0 && (
+      {/* 全栈转型（放最底）：后端代码量与任务数（当前筛选范围内有后端产出时展示） */}
+      {extra.backendStats.tasks > 0 && (
         <Row gutter={[16, 16]}>
           <Col xs={24} lg={24}>
-            <BackendMilestone extra={extra} />
+            <BackendStats extra={extra} />
           </Col>
         </Row>
       )}
