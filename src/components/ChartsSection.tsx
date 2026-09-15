@@ -539,12 +539,14 @@ export default function ChartsSection({
           <KeywordBubble extra={extra} />
         </Col>
       </Row>
-      {/* 业务分布：产出代码库 + 各业务工作类型（随季度变） */}
+      {/* 业务分布：产出代码库（整行占满）+ 各业务工作类型（另起一行） */}
       <Row gutter={[16, 16]}>
-        <Col xs={24} lg={12}>
+        <Col xs={24} lg={24}>
           <BizRepoTreemap extra={extra} />
         </Col>
-        <Col xs={24} lg={12}>
+      </Row>
+      <Row gutter={[16, 16]}>
+        <Col xs={24} lg={24}>
           <BizCategoryHeatmap extra={extra} />
         </Col>
       </Row>
