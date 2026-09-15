@@ -437,9 +437,9 @@ function BizRepoTreemap({ extra }: { extra: ExtraStats }) {
   )
 }
 
-/** 后端产出（全栈转型）：直观展示后端代码量与任务数 */
+/** 后端产出（全栈转型）：直观展示后端代码量、任务数与涉及代码库数 */
 function BackendStats({ extra }: { extra: ExtraStats }) {
-  const { insertions, tasks } = extra.backendStats
+  const { insertions, tasks, repos } = extra.backendStats
   return (
     <Card size="small" title="全栈转型 · 后端产出" className="charts-card">
       <div style={{ display: 'flex', gap: 32, padding: '18px 8px', alignItems: 'center' }}>
@@ -455,6 +455,14 @@ function BackendStats({ extra }: { extra: ExtraStats }) {
           <div style={{ fontSize: 12, color: '#8a93a5', marginBottom: 6 }}>后端任务数</div>
           <div style={{ fontSize: 34, fontWeight: 700, color: '#a78bfa', lineHeight: 1.3 }}>
             {tasks}
+            <span style={{ fontSize: 14, fontWeight: 400, color: '#8a93a5', marginLeft: 6 }}>个</span>
+          </div>
+        </div>
+        <div style={{ width: 1, height: 44, background: 'rgba(120,135,165,0.15)' }} />
+        <div style={{ flex: 1, textAlign: 'center' }}>
+          <div style={{ fontSize: 12, color: '#8a93a5', marginBottom: 6 }}>涉及代码库</div>
+          <div style={{ fontSize: 34, fontWeight: 700, color: '#a78bfa', lineHeight: 1.3 }}>
+            {repos}
             <span style={{ fontSize: 14, fontWeight: 400, color: '#8a93a5', marginLeft: 6 }}>个</span>
           </div>
         </div>

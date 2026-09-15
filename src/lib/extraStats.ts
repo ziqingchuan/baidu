@@ -29,8 +29,8 @@ export interface ExtraStats {
   bizRepo: { biz: string; repo: string; count: number }[]
   /** 纯代码库聚合（按代码库分块，矩形大小 = 该库任务数） */
   repoCount: { repo: string; count: number }[]
-  /** 后端产出（全栈转型）：代码量（累计新增行）与任务数，随筛选范围变化 */
-  backendStats: { insertions: number; tasks: number }
+  /** 后端产出（全栈转型）：代码量（累计新增行）、任务数、涉及代码库数，随筛选范围变化 */
+  backendStats: { insertions: number; tasks: number; repos: number }
 }
 
 const STOP_WORDS = new Set([
@@ -164,11 +164,12 @@ export function buildExtraStats(events: EventItem[], metas: Record<string, Event
     .map(([repo, count]) => ({ repo, count }))
     .sort((a, b) => b.count - a.count)
 
-  // 后端产出（全栈转型）：后端库的代码量与任务数，随筛选范围变化
+  // 后端产出（全栈转型）：后端库的代码量、任务数与涉及代码库数，随筛选范围变化
   const backendEvents = events.filter((e) => isBackendRepo(e.repo))
   const backendStats = {
     insertions: backendEvents.reduce((a, e) => a + e.insertions, 0),
     tasks: backendEvents.length,
+    repos: new Set(backendEvents.map((e) => repoShortName(e.repo))).size,
   }
 
   return {
