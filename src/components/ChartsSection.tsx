@@ -560,14 +560,6 @@ export default function ChartsSection({
           <BizRepoTreemap extra={extra} />
         </Col>
       </Row>
-      {/* 全栈转型：后端产出里程碑（当前筛选范围内有后端产出时展示） */}
-      {extra.backendMilestones.length > 0 && (
-        <Row gutter={[16, 16]}>
-          <Col xs={24} lg={24}>
-            <BackendMilestone extra={extra} />
-          </Col>
-        </Row>
-      )}
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={16}>
           <BizCategoryHeatmap extra={extra} />
@@ -597,6 +589,14 @@ export default function ChartsSection({
           <CodeVolume stats={stats} />
         </Col>
       </Row>
+      {/* 全栈转型（放最底）：后端产出里程碑（当前筛选范围内有后端产出时展示） */}
+      {extra.backendMilestones.length > 0 && (
+        <Row gutter={[16, 16]}>
+          <Col xs={24} lg={24}>
+            <BackendMilestone extra={extra} />
+          </Col>
+        </Row>
+      )}
     </div>
   )
 }
