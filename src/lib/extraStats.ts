@@ -56,7 +56,7 @@ function hourOf(date: string): number {
 function repoShortName(repoPath: string): string {
   const low = repoPath.toLowerCase()
   if (low.includes('personal-code')) return 'personal-code'
-  if (low.includes('bunnydo')) return 'BunnyDo'
+  // bunnydo 各子库按路径最后一段独立展示（bunnydo-server / bunnydo-frontend 各自成块，不再合并成 BunnyDo）
   if (low.includes('coding-suggestion')) return 'coding-suggestion'
   if (low.includes('dodo')) return 'dodo'
   return repoPath.split('/').pop() ?? repoPath
