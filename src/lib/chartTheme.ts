@@ -5,7 +5,7 @@
  */
 import * as echarts from 'echarts/core'
 import {
-  BarChart, LineChart, PieChart, RadarChart, HeatmapChart, ScatterChart, TreemapChart,
+  BarChart, LineChart, PieChart, RadarChart, HeatmapChart, ScatterChart, TreemapChart, EffectScatterChart,
 } from 'echarts/charts'
 import {
   TitleComponent, TooltipComponent, GridComponent, LegendComponent,
@@ -16,7 +16,7 @@ import { LabelLayout } from 'echarts/features'
 
 // 按需注册（新增图表类型时在此补充对应 Chart / Component / Feature，否则不生效）
 echarts.use([
-  BarChart, LineChart, PieChart, RadarChart, HeatmapChart, ScatterChart, TreemapChart,
+  BarChart, LineChart, PieChart, RadarChart, HeatmapChart, ScatterChart, TreemapChart, EffectScatterChart,
   TitleComponent, TooltipComponent, GridComponent, LegendComponent,
   PolarComponent, RadarComponent, CalendarComponent, VisualMapComponent,
   CanvasRenderer,

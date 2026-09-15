@@ -6,6 +6,7 @@ import type { AchievementDef } from '../lib/achievements'
 import { dateQuarter } from '../lib/dateQuarter'
 import type { EventItem, EventMeta } from '../types'
 import type { CategoryId } from '../lib/categories'
+import { isBackendRepo } from '../lib/backend'
 
 /** 勋章图：按 id 自动加载 src/assets/achievements/ 下所有 webp（文件名即成就 id，如 workday-5.webp → id workday-5） */
 const medalModules = import.meta.glob('../assets/achievements/*.webp', { eager: true, import: 'default' }) as Record<string, string>
@@ -22,13 +23,6 @@ function medalIcon(id: string): string {
 }
 
 // ---------- 达成条件用到的统计工具 ----------
-
-/** 后端代码库（全栈转型成就判定）：在这些库里的产出视为「后端开发任务」。新增后端库时往这里加。 */
-const BACKEND_REPOS = ['bunnydo-server']
-
-function isBackendRepo(repo: string): boolean {
-  return BACKEND_REPOS.some((r) => repo.toLowerCase().includes(r))
-}
 
 /** 是否为工作日（周一~周五） */
 function isWorkday(dateStr: string): boolean {
