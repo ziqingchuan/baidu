@@ -78,88 +78,6 @@ function MonthlyEvents({ stats }: { stats: BoardStats }) {
   )
 }
 
-/** 分类平均难度（横向分叉柱：以 3.0 为轴，高于=绿向右，低于=橙向左） */
-function DifficultyBars({ stats }: { stats: BoardStats }) {
-  const scored = stats.difficultyStats.filter((d) => d.scored > 0)
-  if (!scored.length) {
-    return (
-      <Card size="small" title="任务平均难度" className="charts-card">
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a9b0bf', fontSize: 13 }}>
-          给任务打分后这里会展示各分类的平均难度
-        </div>
-      </Card>
-    )
-  }
-  const MID = 3 // 难度中等参照值
-  const rows = scored
-    .map((d) => ({ ...d, diff: d.avg - MID }))
-    .sort((a, b) => b.diff - a.diff)
-  // 重叠柱：透明基底固定撑到 3.0 轴，彩色段覆盖其上 → 绿(高于3)/橙(低于3)从轴线向两侧伸出
-  const base = rows.map(() => MID)
-  const option = {
-    ...chartBase,
-    tooltip: {
-      ...chartBase.tooltip,
-      trigger: 'axis',
-      axisPointer: { type: 'shadow' },
-      formatter: (p: any) => {
-        const d = rows[p[0]?.dataIndex]
-        return `${d?.name}<br/>平均难度 ${d?.avg} / 5<br/>已打分 ${d?.scored} 件`
-      },
-    },
-    grid: { ...chartBase.grid, top: 20, left: 90, right: 56, bottom: 24 },
-    xAxis: {
-      type: 'value',
-      min: 0,
-      max: 5,
-      axisLabel: { fontSize: 10, color: '#a9b0bf' },
-      axisLine: { show: false },
-      axisTick: { show: false },
-      splitLine: { show: true, lineStyle: { color: 'rgba(120,135,165,0.08)' } },
-      name: '3.0 = 中等难度',
-      nameLocation: 'middle',
-      nameGap: 30,
-      nameTextStyle: { color: '#8a93a5', fontSize: 11, fontWeight: 600 },
-    },
-    yAxis: {
-      type: 'category',
-      data: rows.map((d) => d.name),
-      axisLabel: { fontSize: 12, color: '#3a4150' },
-      axisLine: { show: false },
-      axisTick: { show: false },
-    },
-    series: [
-      {
-        name: '难度标尺',
-        type: 'bar',
-        barGap: '-100%',
-        data: base,
-        barMaxWidth: 24,
-        itemStyle: { color: 'rgba(120,135,165,0.14)', borderRadius: 12 },
-        tooltip: { show: false },
-      },
-      {
-        name: '难度',
-        type: 'bar',
-        barGap: '-100%',
-        data: rows.map((d) => d.avg),
-        barMaxWidth: 24,
-        itemStyle: {
-          color: (p: any) => (rows[p.dataIndex]?.diff >= 0 ? 'rgba(146,203,170,0.85)' : 'rgba(244,178,160,0.85)'),
-          borderRadius: 12,
-        },
-        // 数值不直接显示，hover tooltip 查看（label 在重叠柱上难以移出矩形）
-        label: { show: false },
-      },
-    ],
-  }
-  return (
-    <Card size="small" title="任务平均难度" className="charts-card">
-      <ReactEChartsCore echarts={echarts} option={option} style={{ height: 280 }} notMerge />
-    </Card>
-  )
-}
-
 /** 代码量月度（次要展示，保留但收敛） */
 function CodeVolume({ stats }: { stats: BoardStats }) {
   const option = {
@@ -546,29 +464,26 @@ export default function ChartsSection({
         </Col>
       </Row>
       <Row gutter={[16, 16]}>
-        <Col xs={24} lg={24}>
+        <Col xs={24} lg={16}>
           <BizCategoryHeatmap extra={extra} />
-        </Col>
-      </Row>
-      {/* 工作节奏：周节奏 + 24h 节律（随季度变） */}
-      <Row gutter={[16, 16]}>
-        <Col xs={24} lg={8}>
-          <WeekdayRadar extra={extra} />
-        </Col>
-        <Col xs={24} lg={8}>
-          <HourClock extra={extra} />
         </Col>
         <Col xs={24} lg={8}>
           <CategoryDonut stats={stats} />
         </Col>
       </Row>
-      {/* 分类趋势 + 难度 */}
+      {/* 工作节奏：周节奏 + 24h 节律（随季度变） */}
       <Row gutter={[16, 16]}>
-        <Col xs={24} lg={16}>
-          <MonthlyEvents stats={stats} />
+        <Col xs={24} lg={12}>
+          <WeekdayRadar extra={extra} />
         </Col>
-        <Col xs={24} lg={8}>
-          <DifficultyBars stats={stats} />
+        <Col xs={24} lg={12}>
+          <HourClock extra={extra} />
+        </Col>
+      </Row>
+      {/* 分类趋势 */}
+      <Row gutter={[16, 16]}>
+        <Col xs={24} lg={24}>
+          <MonthlyEvents stats={stats} />
         </Col>
       </Row>
       {/* 代码质量 */}
